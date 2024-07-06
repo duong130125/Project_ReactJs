@@ -1,3 +1,72 @@
 {
-    
+    "users": [
+        {
+            "id": 1,
+            "name": "user1",
+            "password": "123456",
+            "email": "1@gmail.com",
+            "role": 1,
+            "profilePicture": "user1.jpg",
+            "status": false 
+        },
+        {
+            "id": 1,
+            "name": "user1",
+            "password": "123456",
+            "email": "1@gmail.com",
+            "role": 1,
+            "profilePicture": "user1.jpg",
+            "status": false 
+        },
+        {
+            "id": 1,
+            "name": "user1",
+            "password": "123456",
+            "email": "1@gmail.com",
+            "role": 1,
+            "profilePicture": "user1.jpg",
+            "status": false 
+        }
+    ],
+    "courses": [
+        {
+            "id": 1,
+            "title": "Khóa luyện thi đại học",
+            "description": "Khóa thi chuẩn bị cho thi đại học"
+        }
+    ],
+    "examSubjects": [
+        {
+            "id": 2,
+            "title": "Môn toán",
+            "description": "Luyện đề môn toán",
+            "courseId": 1
+        }
+    ],
+    "exams": [
+        {
+            "id": 3,
+            "title": "Đề thi toán nghệ an",
+            "description": "Luyện đề môn toán năm 2024",
+            "duration": 90,
+            "examSubjectId": 2
+        }
+    ],
+    "questions": [
+        {
+            "id": 1,
+            "question": "hình vuông có mấy cạnh",
+            "examId": 3,
+            "options": [1, 2, 3, 4],
+            "answer": "4"
+        }
+    ],
+    "userAnswers": [
+        {
+            "id": 1,
+            "userId": 1,
+            "exampId": 2,
+            "score": 8
+        }
+    ]
 }
