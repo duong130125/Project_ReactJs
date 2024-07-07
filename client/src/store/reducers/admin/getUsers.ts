@@ -4,37 +4,59 @@ import baseUrl from "../../../api/api";
 
 const userad: Users[] = [];
 
-// hàm hiện thị tất cả todo
+// Fetch all users
 export const getUserAd: any = createAsyncThunk("user/getUserAd", async () => {
   const response = await baseUrl.get("users");
   return response.data;
 });
 
-// // hàm thêm mới todo
-// export const addTodo:any = createAsyncThunk("todo/addTodo", async (todo: TodoLists) => {
-//   const response = await axios.post("http://localhost:8080/TodoList", todo);
-//   return response.data;
-// });
+// Search users
+export const searchUsers: any = createAsyncThunk(
+  "user/searchUsers",
+  async (query: string) => {
+    const response = await baseUrl.get(`users?name_like=${query}`);
+    return response.data;
+  }
+);
 
-// // hàm checkbox todo
-// export const checkboxTodo:any = createAsyncThunk("todo/checkTodo", async (id: number) => {
-//   const response = await axios.get(`http://localhost:8080/TodoList/${id}`);
-//   const updatedTodo = { ...response.data, status: !response.data.status };
-//   await axios.put(`http://localhost:8080/TodoList/${id}`, updatedTodo);
-//   return updatedTodo;
-// });
+// Sort users
+export const sortUsers: any = createAsyncThunk(
+  "user/sortUsers",
+  async ({ order, field }: { order: string; field: string }) => {
+    const response = await baseUrl.get(`users?_sort=${field}&_order=${order}`);
+    return response.data;
+  }
+);
 
-// // hàm xóa todo
-// export const deleteTodo:any = createAsyncThunk("todo/deleteTodo", async (id: number) => {
-//   await axios.delete(`http://localhost:8080/TodoList/${id}`);
-//   return id;
-// });
+// Add a new user
+export const addUser: any = createAsyncThunk(
+  "user/addUser",
+  async (user: Users) => {
+    const newUser = { ...user, status: true, role: 0 };
+    const response = await baseUrl.post("users", newUser);
+    return response.data;
+  }
+);
 
-// // hàm cập nhật todo
-// export const updateTodo:any = createAsyncThunk("todo/updateTodo", async (todo: TodoLists) => {
-//   const response = await axios.put(`http://localhost:8080/TodoList/${todo.id}`, todo);
-//   return response.data;
-// });
+// Lock/Unlock a user
+export const toggleUserLock: any = createAsyncThunk(
+  "user/toggleUserLock",
+  async (id: number) => {
+    const response = await baseUrl.get(`users/${id}`);
+    const updatedUser = { ...response.data, status: !response.data.status };
+    await baseUrl.put(`users/${id}`, updatedUser);
+    return updatedUser;
+  }
+);
+
+// Delete a user
+export const deleteUser: any = createAsyncThunk(
+  "user/deleteUser",
+  async (id: number) => {
+    await baseUrl.delete(`users/${id}`);
+    return id;
+  }
+);
 
 const userAdmin = createSlice({
   name: "userad",
@@ -46,28 +68,28 @@ const userAdmin = createSlice({
     builder.addCase(getUserAd.fulfilled, (state: any, action: any) => {
       state.user = action.payload;
     });
-
-    // .addCase(addTodo.fulfilled, (state, action) => {
-    //   state.todo.push(action.payload);
-    // })
-
-    // .addCase(checkboxTodo.fulfilled, (state, action) => {
-    //   const index = state.todo.findIndex((todo) => todo.id === action.payload.id);
-    //   if (index !== -1) {
-    //     state.todo[index] = action.payload;
-    //   }
-    // })
-
-    // .addCase(deleteTodo.fulfilled, (state, action) => {
-    //   state.todo = state.todo.filter((todo) => todo.id !== action.payload);
-    // })
-
-    // .addCase(updateTodo.fulfilled, (state, action) => {
-    //   const index = state.todo.findIndex((todo) => todo.id === action.payload.id);
-    //   if (index !== -1) {
-    //     state.todo[index] = action.payload;
-    //   }
-    // });
+    builder.addCase(searchUsers.fulfilled, (state: any, action: any) => {
+      state.user = action.payload;
+    });
+    builder.addCase(sortUsers.fulfilled, (state: any, action: any) => {
+      state.user = action.payload;
+    });
+    builder.addCase(addUser.fulfilled, (state: any, action: any) => {
+      state.user.push(action.payload);
+    });
+    builder.addCase(toggleUserLock.fulfilled, (state: any, action: any) => {
+      const index = state.user.findIndex(
+        (user: Users) => user.id === action.payload.id
+      );
+      if (index !== -1) {
+        state.user[index] = action.payload;
+      }
+    });
+    builder.addCase(deleteUser.fulfilled, (state: any, action: any) => {
+      state.user = state.user.filter(
+        (user: Users) => user.id !== action.payload
+      );
+    });
   },
 });
 

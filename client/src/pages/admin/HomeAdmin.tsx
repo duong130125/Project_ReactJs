@@ -1,10 +1,9 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   FaUsers,
   FaCog,
   FaChartPie,
   FaBell,
-  FaSearch,
   FaSignOutAlt,
   FaBook,
   FaClipboardList,
@@ -13,17 +12,47 @@ import {
 } from "react-icons/fa";
 import { Users } from "../../interfaces/Users";
 import { useDispatch, useSelector } from "react-redux";
-import { getUserAd } from "../../store/reducers/admin/getUsers";
+import {
+  getUserAd,
+  toggleUserLock,
+  deleteUser,
+  searchUsers,
+  sortUsers,
+} from "../../store/reducers/admin/getUsers";
+import NewUserForm from "../../components/admin/FormNewUser";
 
 export default function HomeAdmin() {
   const getData: Users[] = useSelector((state: any) => state.user.user);
   const dispatch = useDispatch();
-  console.log(getData);
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortOrder, setSortOrder] = useState("desc");
 
-  // hiện thị công việc
   useEffect(() => {
     dispatch(getUserAd());
   }, [dispatch]);
+
+  useEffect(() => {
+    dispatch(searchUsers(searchQuery));
+  }, [searchQuery, dispatch]);
+
+  useEffect(() => {
+    dispatch(
+      sortUsers({ order: sortOrder === "asc" ? "asc" : "desc", field: "name" })
+    );
+  }, [sortOrder, dispatch]);
+
+  const toggleModalVisibility = () => {
+    setModalVisible(!isModalVisible);
+  };
+
+  const handleToggleLock = (id: number) => {
+    dispatch(toggleUserLock(id));
+  };
+
+  const handleDeleteUser = (id: number) => {
+    dispatch(deleteUser(id));
+  };
 
   return (
     <>
@@ -40,14 +69,7 @@ export default function HomeAdmin() {
             </span>
           </h1>
           <div className="flex items-center space-x-4">
-            <div className="relative">
-              <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white" />
-              <input
-                type="text"
-                className="bg-white bg-opacity-20 border border-transparent focus:border-white focus:bg-opacity-30 focus:outline-none text-white py-2 pl-10 pr-4 rounded-full"
-                placeholder="Search..."
-              />
-            </div>
+            <div className="relative"></div>
             <FaBell className="text-white text-xl" />
             <span className="text-white">Welcome, Admin</span>
             <img
@@ -88,6 +110,32 @@ export default function HomeAdmin() {
           </ul>
         </nav>
         <main className="flex-grow p-6">
+          <div className="flex justify-between items-center mb-4">
+            <button
+              onClick={toggleModalVisibility}
+              className="py-2 px-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+            >
+              Thêm mới
+            </button>
+            <div className="flex items-center space-x-2">
+              <input
+                type="text"
+                className="py-2 px-4 bg-white border rounded-lg shadow-sm focus:outline-none"
+                placeholder="Search..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <select
+                className="py-2 px-4 bg-white border rounded-lg shadow-sm focus:outline-none"
+                value={sortOrder}
+                onChange={(e) => setSortOrder(e.target.value)}
+              >
+                <option value="desc">Giảm dần</option>
+                <option value="asc">Tăng dần</option>
+              </select>
+            </div>
+          </div>
+          {isModalVisible && <NewUserForm setModalVisible={setModalVisible} />}
           <table className="min-w-full bg-white rounded-lg shadow-lg">
             <thead>
               <tr className="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
@@ -112,12 +160,22 @@ export default function HomeAdmin() {
                   <td className="py-3 px-6 text-left">{item.email}</td>
                   <td className="py-3 px-6 text-left">{item.profilePicture}</td>
                   <td className="py-3 px-6 text-left">
-                    <button className="text-red-500 hover:text-red-600">
-                      Khóa
+                    <button
+                      onClick={() => handleToggleLock(item.id)}
+                      className={`${
+                        item.status
+                          ? "text-red-500 hover:text-red-600"
+                          : "text-green-500 hover:text-green-600"
+                      }`}
+                    >
+                      {item.status ? "Khóa" : "Mở khóa"}
                     </button>
                   </td>
                   <td className="py-3 px-6 text-left">
-                    <button className="text-red-600 hover:text-red-900 ml-2">
+                    <button
+                      onClick={() => handleDeleteUser(item.id)}
+                      className="text-red-600 hover:text-red-900 ml-2"
+                    >
                       Delete
                     </button>
                   </td>
