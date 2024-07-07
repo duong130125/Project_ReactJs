@@ -26,7 +26,7 @@ export default function HomeAdmin() {
   const dispatch = useDispatch();
   const [isModalVisible, setModalVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortOrder, setSortOrder] = useState("desc");
+  const [sortOrder, setSortOrder] = useState("asc");
 
   useEffect(() => {
     dispatch(getUserAd());
@@ -130,8 +130,8 @@ export default function HomeAdmin() {
                 value={sortOrder}
                 onChange={(e) => setSortOrder(e.target.value)}
               >
-                <option value="desc">Giảm dần</option>
                 <option value="asc">Tăng dần</option>
+                <option value="desc">Giảm dần</option>
               </select>
             </div>
           </div>
