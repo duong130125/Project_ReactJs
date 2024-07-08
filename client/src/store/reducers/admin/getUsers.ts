@@ -32,8 +32,7 @@ export const sortUsers: any = createAsyncThunk(
 export const addUser: any = createAsyncThunk(
   "user/addUser",
   async (user: Users) => {
-    const newUser = { ...user, status: true, role: 0 };
-    const response = await baseUrl.post("users", newUser);
+    const response = await baseUrl.post("users", user);
     return response.data;
   }
 );

@@ -7,7 +7,7 @@ export default function App() {
   return (
     <>
       <Routes>
-        <Route path="/admin" element={<HomeAdmin />}></Route>
+        <Route path="/admin/*" element={<HomeAdmin />}></Route>
         <Route path="/login" element={<Login />}></Route>
         <Route path="/register" element={<Register />}></Route>
       </Routes>

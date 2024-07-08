@@ -13,15 +13,25 @@ const NewUserForm = ({
     name: "",
     email: "",
     profilePicture: "",
+    role: 0,
+    status: true,
+    password: "",
   });
 
   const handleAddUser = (e: any) => {
     e.preventDefault();
     dispatch(addUser(newUser));
-    setNewUser({ name: "", email: "", profilePicture: "" });
+    setNewUser({
+      name: "",
+      email: "",
+      profilePicture: "",
+      role: 0,
+      status: true,
+      password: "",
+    });
     setModalVisible(false);
     notification.success({
-      message: "thành công",
+      message: "Thành công",
       description: "Thêm mới thành công",
     });
   };
@@ -69,6 +79,18 @@ const NewUserForm = ({
                 })
               }
               className="py-2 px-4 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div className="flex flex-col space-y-2">
+            <label className="text-gray-700 font-medium">Password</label>
+            <input
+              type="password"
+              value={newUser.password}
+              onChange={(e) =>
+                setNewUser({ ...newUser, password: e.target.value })
+              }
+              className="py-2 px-4 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
             />
           </div>
           <div className="flex justify-end space-x-4">
