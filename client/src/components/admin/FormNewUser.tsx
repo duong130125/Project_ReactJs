@@ -16,6 +16,7 @@ const NewUserForm = ({
     role: 0,
     status: true,
     password: "",
+    confirmPassword: "",
   });
 
   const handleAddUser = (e: any) => {
@@ -28,6 +29,7 @@ const NewUserForm = ({
       role: 0,
       status: true,
       password: "",
+      confirmPassword: "",
     });
     setModalVisible(false);
     notification.success({
@@ -44,13 +46,12 @@ const NewUserForm = ({
         </h2>
         <form onSubmit={handleAddUser} className="space-y-4">
           <div className="flex flex-col space-y-2">
-            <label className="text-gray-700 font-medium">Name</label>
+            <label className="text-gray-700 font-medium">Họ và tên</label>
             <input
               type="text"
               value={newUser.name}
               onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
               className="py-2 px-4 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
             />
           </div>
           <div className="flex flex-col space-y-2">
@@ -62,13 +63,10 @@ const NewUserForm = ({
                 setNewUser({ ...newUser, email: e.target.value })
               }
               className="py-2 px-4 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
             />
           </div>
           <div className="flex flex-col space-y-2">
-            <label className="text-gray-700 font-medium">
-              Profile Picture URL
-            </label>
+            <label className="text-gray-700 font-medium">Ảnh Đại Diện</label>
             <input
               type="text"
               value={newUser.profilePicture}
@@ -82,7 +80,7 @@ const NewUserForm = ({
             />
           </div>
           <div className="flex flex-col space-y-2">
-            <label className="text-gray-700 font-medium">Password</label>
+            <label className="text-gray-700 font-medium">Mật Khẩu</label>
             <input
               type="password"
               value={newUser.password}
@@ -90,22 +88,34 @@ const NewUserForm = ({
                 setNewUser({ ...newUser, password: e.target.value })
               }
               className="py-2 px-4 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
+            />
+          </div>
+          <div className="flex flex-col space-y-2">
+            <label className="text-gray-700 font-medium">
+              Nhập lại mật khẩu
+            </label>
+            <input
+              type="password"
+              value={newUser.confirmPassword}
+              onChange={(e) =>
+                setNewUser({ ...newUser, confirmPassword: e.target.value })
+              }
+              className="py-2 px-4 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
           <div className="flex justify-end space-x-4">
+            <button
+              type="submit"
+              className="py-2 px-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+            >
+              Thêm mới
+            </button>
             <button
               type="button"
               onClick={() => setModalVisible(false)}
               className="py-2 px-4 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
             >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="py-2 px-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-            >
-              Add User
+              Hủy
             </button>
           </div>
         </form>

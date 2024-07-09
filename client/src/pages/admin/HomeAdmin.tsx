@@ -58,21 +58,6 @@ export default function HomeAdmin() {
                 <FaBook className="mr-2" /> Courses
               </Link>
             </li>
-            <li className="ml-6 flex items-center p-2 hover:bg-yellow-200 rounded-md text-yellow-500">
-              <Link to="subjectAd" className="flex">
-                <FaClipboardList className="mr-2" /> Subjects
-              </Link>
-            </li>
-            <li className="ml-12 flex items-center p-2 hover:bg-purple-200 rounded-md text-purple-500">
-              <Link to="examAd" className="flex">
-                <FaFileAlt className="mr-2" /> Exams
-              </Link>
-            </li>
-            <li className="ml-18 flex items-center p-2 hover:bg-pink-200 rounded-md text-pink-500">
-              <Link to="questionAd" className="flex">
-                <FaQuestionCircle className="mr-2" /> Questions
-              </Link>
-            </li>
             <li className="flex items-center p-2 hover:bg-gray-200 rounded-md text-gray-500">
               <FaCog className="mr-2" /> Settings
             </li>
@@ -82,9 +67,18 @@ export default function HomeAdmin() {
           <Routes>
             <Route path="userAd" element={<ManageUser />}></Route>
             <Route path="coursesAd" element={<ManageCourses />}></Route>
-            <Route path="subjectAd" element={<ManageSubjects />}></Route>
-            <Route path="examAd" element={<ManageExams />}></Route>
-            <Route path="questionAd" element={<ManageQuestions />}></Route>
+            <Route
+              path="coursesAd/subjectAd/:id"
+              element={<ManageSubjects />}
+            ></Route>
+            <Route
+              path="coursesAd/subjectAd/examAd/:id"
+              element={<ManageExams />}
+            ></Route>
+            <Route
+              path="coursesAd/subjectAd/examAd/questionAd/:id"
+              element={<ManageQuestions />}
+            ></Route>
           </Routes>
         </main>
       </div>

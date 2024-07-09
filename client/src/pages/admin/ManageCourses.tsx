@@ -7,11 +7,12 @@ import {
   editCourse,
   fetchCourses,
 } from "../../store/reducers/admin/getCourses";
+import CourseFormModal from "../../components/admin/FormCourse";
+import { useNavigate } from "react-router-dom";
 
 export default function ManageCourses() {
   const dispatch = useDispatch();
   const courses: Courses[] = useSelector((state: any) => state.course.course);
-  console.log(courses);
 
   const [newCourse, setNewCourse] = useState({
     title: "",
@@ -19,12 +20,14 @@ export default function ManageCourses() {
   });
   const [editingCourse, setEditingCourse] = useState<null | Courses>(null);
   const [modalIsOpen, setModalIsOpen] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     dispatch(fetchCourses());
   }, [dispatch]);
 
   const openModal = () => setModalIsOpen(true);
+
   const closeModal = () => {
     setModalIsOpen(false);
     setEditingCourse(null);
@@ -51,6 +54,10 @@ export default function ManageCourses() {
     dispatch(deleteCourse(courseId));
   };
 
+  const handleNext = (id: number) => {
+    navigate(`/admin/coursesAd/subjectAd/${id}`);
+  };
+
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Quản Lý Khóa Thi</h1>
@@ -71,7 +78,7 @@ export default function ManageCourses() {
         </thead>
         <tbody>
           {courses.map((course: Courses, index: number) => (
-            <tr key={course.id}>
+            <tr key={course.id} onClick={() => handleNext(course.id)}>
               <td className="py-2 px-4 border-b text-center">{index + 1}</td>
               <td className="py-2 px-4 border-b text-center">{course.title}</td>
               <td className="py-2 px-4 border-b text-center">
@@ -80,7 +87,7 @@ export default function ManageCourses() {
               <td className="py-2 px-4 border-b text-center">
                 <button
                   onClick={() => handleEditCourse(course)}
-                  className="bg-blue-500 text-white px-4 py-2 rounded mr-2"
+                  className="bg-yellow-400 text-white px-4 py-2 rounded mr-2"
                 >
                   Sửa
                 </button>
@@ -96,45 +103,14 @@ export default function ManageCourses() {
         </tbody>
       </table>
 
-      {modalIsOpen && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-4 rounded w-1/2">
-            <h2 className="text-xl font-bold mb-4">
-              {editingCourse ? "Cập Nhật Khóa Thi" : "Thêm Mới Khóa Thi"}
-            </h2>
-            <input
-              type="text"
-              value={newCourse.title}
-              onChange={(e) =>
-                setNewCourse({ ...newCourse, title: e.target.value })
-              }
-              placeholder="Tiêu Đề"
-              className="border p-2 mb-2 w-full"
-            />
-            <input
-              type="text"
-              value={newCourse.description}
-              onChange={(e) =>
-                setNewCourse({ ...newCourse, description: e.target.value })
-              }
-              placeholder="Mô Tả"
-              className="border p-2 mb-2 w-full"
-            />
-            <button
-              onClick={editingCourse ? handleSaveCourse : handleAddCourse}
-              className="bg-blue-500 text-white px-4 py-2 rounded mr-2"
-            >
-              {editingCourse ? "Lưu" : "Thêm Mới"}
-            </button>
-            <button
-              onClick={closeModal}
-              className="bg-gray-500 text-white px-4 py-2 rounded"
-            >
-              Hủy
-            </button>
-          </div>
-        </div>
-      )}
+      <CourseFormModal
+        isOpen={modalIsOpen}
+        closeModal={closeModal}
+        course={newCourse}
+        setCourse={setNewCourse}
+        handleSave={editingCourse ? handleSaveCourse : handleAddCourse}
+        isEditing={!!editingCourse}
+      />
     </div>
   );
 }

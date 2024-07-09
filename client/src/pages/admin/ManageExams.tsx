@@ -1,131 +1,150 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Exams } from "../../interfaces/Users";
+import {
+  addExam,
+  deleteExam,
+  editExam,
+  fetchExams,
+} from "../../store/reducers/admin/getExam";
+import ExamModal from "../../components/admin/FormExam";
+import { useNavigate, useParams } from "react-router-dom";
 
 export default function ManageExams() {
-  const [exams, setExams] = useState([
-    {
-      id: 1,
-      title: "Đề Thi 1",
-      description: "Mô tả cho đề thi 1",
-      duration: 90,
-    },
-    {
-      id: 2,
-      title: "Đề Thi 2",
-      description: "Mô tả cho đề thi 2",
-      duration: 120,
-    },
-  ]);
+  const dispatch = useDispatch();
+  let { id } = useParams();
+  const navigate = useNavigate();
+  const exams: Exams[] = useSelector((state: any) => state.exam.exam);
 
-  const [newExam, setNewExam] = useState({
+  const [examData, setExamData] = useState({
     title: "",
     description: "",
     duration: "",
+    examSubjectId: Number(id),
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | any>) => {
+  useEffect(() => {
+    dispatch(fetchExams(id));
+  }, [dispatch]);
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
-    setNewExam({ ...newExam, [name]: value });
+    setExamData({ ...examData, [name]: value });
   };
 
   const handleAddExam = () => {
-    if (newExam.title && newExam.description && newExam.duration) {
-      const newId = exams.length ? exams[exams.length - 1].id + 1 : 1;
-      setExams([
-        ...exams,
-        { id: newId, ...newExam, duration: parseInt(newExam.duration) },
-      ]);
-      setNewExam({ title: "", description: "", duration: "" });
+    if (examData.title && examData.description && examData.duration) {
+      dispatch(addExam({ ...examData, duration: parseInt(examData.duration) }));
+      setExamData({
+        title: "",
+        description: "",
+        duration: "",
+        examSubjectId: Number(id),
+      });
       setIsModalOpen(false);
     }
   };
-  return (
-    <>
-      <div className="container mx-auto p-4">
-        <h1 className="text-2xl font-bold mb-4">Quản Lý Đề Thi</h1>
-        <button
-          className="bg-violet-800 text-white px-4 py-2 rounded mb-4"
-          onClick={() => setIsModalOpen(true)}
-        >
-          Thêm Mới
-        </button>
-        <table className="min-w-full bg-white border border-gray-200">
-          <thead>
-            <tr>
-              <th className="py-2 px-4 border-b">STT</th>
-              <th className="py-2 px-4 border-b">Tiêu Đề</th>
-              <th className="py-2 px-4 border-b">Mô Tả</th>
-              <th className="py-2 px-4 border-b">Thời Gian Thi (phút)</th>
-              <th className="py-2 px-4 border-b">Chức Năng</th>
-            </tr>
-          </thead>
-          <tbody>
-            {exams.map((exam, index) => (
-              <tr key={exam.id}>
-                <td className="py-2 px-4 border-b text-center">{index + 1}</td>
-                <td className="py-2 px-4 border-b">{exam.title}</td>
-                <td className="py-2 px-4 border-b">{exam.description}</td>
-                <td className="py-2 px-4 border-b text-center">
-                  {exam.duration}
-                </td>
-                <td className="py-2 px-4 border-b text-center">
-                  <button className="bg-blue-500 text-white px-4 py-2 rounded mr-2">
-                    Sửa
-                  </button>
-                  <button className="bg-red-500 text-white px-4 py-2 rounded">
-                    Xóa
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
 
-        {isModalOpen && (
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
-            <div className="bg-white p-6 rounded-lg shadow-lg">
-              <h2 className="text-xl font-bold mb-4">Thêm Đề Thi Mới</h2>
-              <input
-                type="text"
-                name="title"
-                value={newExam.title}
-                onChange={handleInputChange}
-                placeholder="Tiêu Đề"
-                className="w-full p-2 border border-gray-300 rounded mb-4"
-              />
-              <textarea
-                name="description"
-                value={newExam.description}
-                onChange={handleInputChange}
-                placeholder="Mô Tả"
-                className="w-full p-2 border border-gray-300 rounded mb-4"
-              />
-              <input
-                type="number"
-                name="duration"
-                value={newExam.duration}
-                onChange={handleInputChange}
-                placeholder="Thời Gian Thi (phút)"
-                className="w-full p-2 border border-gray-300 rounded mb-4"
-              />
-              <div className="flex justify-end">
+  const handleEditExam = () => {
+    if (examData.title && examData.description && examData.duration) {
+      dispatch(
+        editExam({ ...examData, duration: parseInt(examData.duration) })
+      );
+      setExamData({
+        title: "",
+        description: "",
+        duration: "",
+        examSubjectId: Number(id),
+      });
+      setIsModalOpen(false);
+    }
+  };
+
+  const handleDeleteExam = (examId: number) => {
+    dispatch(deleteExam(examId));
+  };
+
+  const openAddModal = () => {
+    setExamData({
+      title: "",
+      description: "",
+      duration: "",
+      examSubjectId: Number(id),
+    });
+    setIsEditMode(false);
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (exam: any) => {
+    setExamData(exam);
+    setIsEditMode(true);
+    setIsModalOpen(true);
+  };
+
+  const handleNext = (id: number) => {
+    navigate(`/admin/coursesAd/subjectAd/examAd/questionAd/${id}`);
+  };
+
+  return (
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">Quản Lý Đề Thi</h1>
+      <button
+        className="bg-violet-800 text-white px-4 py-2 rounded mb-4"
+        onClick={openAddModal}
+      >
+        Thêm Mới
+      </button>
+      <table className="min-w-full bg-white border border-gray-200">
+        <thead>
+          <tr>
+            <th className="py-2 px-4 border-b">STT</th>
+            <th className="py-2 px-4 border-b">Tiêu Đề</th>
+            <th className="py-2 px-4 border-b">Mô Tả</th>
+            <th className="py-2 px-4 border-b">Thời Gian Thi (phút)</th>
+            <th className="py-2 px-4 border-b">Chức Năng</th>
+          </tr>
+        </thead>
+        <tbody>
+          {exams.map((exam: Exams, index: number) => (
+            <tr key={exam.id} onClick={() => handleNext(exam.id)}>
+              <td className="py-2 px-4 border-b text-center">{index + 1}</td>
+              <td className="py-2 px-4 border-b">{exam.title}</td>
+              <td className="py-2 px-4 border-b">{exam.description}</td>
+              <td className="py-2 px-4 border-b text-center">
+                {exam.duration}
+              </td>
+              <td className="py-2 px-4 border-b text-center">
                 <button
-                  className="bg-gray-500 text-white px-4 py-2 rounded mr-2"
-                  onClick={() => setIsModalOpen(false)}
+                  className="bg-yellow-400 text-white px-4 py-2 rounded mr-2"
+                  onClick={() => openEditModal(exam)}
                 >
-                  Hủy
+                  Sửa
                 </button>
                 <button
-                  className="bg-green-500 text-white px-4 py-2 rounded"
-                  onClick={handleAddExam}
+                  className="bg-red-500 text-white px-4 py-2 rounded"
+                  onClick={() => handleDeleteExam(exam.id)}
                 >
-                  Thêm
+                  Xóa
                 </button>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    </>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {isModalOpen && (
+        <ExamModal
+          isEditMode={isEditMode}
+          examData={examData}
+          handleInputChange={handleInputChange}
+          handleSubmit={isEditMode ? handleEditExam : handleAddExam}
+          closeModal={() => setIsModalOpen(false)}
+        />
+      )}
+    </div>
   );
 }
