@@ -1,13 +1,4 @@
-import {
-  FaUsers,
-  FaCog,
-  FaBell,
-  FaSignOutAlt,
-  FaBook,
-  FaClipboardList,
-  FaFileAlt,
-  FaQuestionCircle,
-} from "react-icons/fa";
+import { FaUsers, FaCog, FaBell, FaSignOutAlt, FaBook } from "react-icons/fa";
 import { Link, Route, Routes } from "react-router-dom";
 import ManageUser from "./ManageUser";
 import ManageCourses from "./ManageCourses";

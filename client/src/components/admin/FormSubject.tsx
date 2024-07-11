@@ -1,59 +1,96 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { Form, Input, Button, Modal } from "antd";
 
 interface SubjectModalProps {
-  isEditMode: boolean;
-  subjectData: { id?: number | null; title: string; description: string };
-  handleInputChange: (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => void;
-  handleSubmit: () => void;
+  isOpen: boolean;
   closeModal: () => void;
+  subject: { id?: number | null; title: string; description: string };
+  setSubject: (subject: {
+    id?: number | null;
+    title: string;
+    description: string;
+  }) => void;
+  handleSave: () => void;
+  isEditing: boolean;
 }
 
 const SubjectModal: React.FC<SubjectModalProps> = ({
-  isEditMode,
-  subjectData,
-  handleInputChange,
-  handleSubmit,
+  isOpen,
   closeModal,
+  subject,
+  setSubject,
+  handleSave,
+  isEditing,
 }) => {
+  const [form] = Form.useForm();
+
+  useEffect(() => {
+    if (isOpen) {
+      form.setFieldsValue(subject);
+    } else {
+      form.resetFields();
+    }
+  }, [isOpen, subject, form]);
+
+  const onFinish = (values: { title: string; description: string }) => {
+    setSubject(values);
+    handleSave();
+    form.resetFields();
+  };
+
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
-      <div className="bg-white p-6 rounded-lg shadow-lg">
-        <h2 className="text-xl font-bold mb-4">
-          {isEditMode ? "Chỉnh Sửa Môn Thi" : "Thêm Môn Thi Mới"}
-        </h2>
-        <input
-          type="text"
+    <Modal
+      visible={isOpen}
+      title={
+        isEditing ? (
+          <h1 className="text-2xl">Chỉnh Sửa Môn Thi</h1>
+        ) : (
+          <h1 className="text-2xl">Thêm Môn Thi Mới</h1>
+        )
+      }
+      onCancel={closeModal}
+      footer={null}
+    >
+      <Form
+        form={form}
+        initialValues={subject}
+        onFinish={onFinish}
+        layout="vertical"
+      >
+        <Form.Item
           name="title"
-          value={subjectData.title}
-          onChange={handleInputChange}
-          placeholder="Tiêu Đề"
-          className="w-full p-2 border border-gray-300 rounded mb-4"
-        />
-        <textarea
+          label="Tiêu Đề"
+          rules={[{ required: true, message: "Tiêu đề không được để trống" }]}
+        >
+          <Input
+            placeholder="Tiêu Đề"
+            onChange={(e) => setSubject({ ...subject, title: e.target.value })}
+          />
+        </Form.Item>
+        <Form.Item
           name="description"
-          value={subjectData.description}
-          onChange={handleInputChange}
-          placeholder="Mô Tả"
-          className="w-full p-2 border border-gray-300 rounded mb-4"
-        />
-        <div className="flex justify-end space-x-4">
-          <button
-            className="bg-orange-400 text-white px-4 py-2 rounded"
-            onClick={handleSubmit}
-          >
-            {isEditMode ? "Cập Nhật" : "Thêm mới"}
-          </button>
-          <button
-            className="bg-gray-500 text-white px-4 py-2 rounded mr-2"
-            onClick={closeModal}
-          >
-            Hủy
-          </button>
-        </div>
-      </div>
-    </div>
+          label="Mô Tả"
+          rules={[{ required: true, message: "Mô tả không được để trống" }]}
+        >
+          <Input.TextArea
+            placeholder="Mô Tả"
+            onChange={(e) =>
+              setSubject({ ...subject, description: e.target.value })
+            }
+          />
+        </Form.Item>
+        <Form.Item>
+          <div className="flex justify-end space-x-4">
+            <Button htmlType="submit" className="bg-orange-400 text-white">
+              {isEditing ? "Cập Nhật" : "Thêm Mới"}
+            </Button>
+            <Button onClick={closeModal} className="bg-gray-500 text-white">
+              Hủy
+            </Button>
+          </div>
+        </Form.Item>
+      </Form>
+    </Modal>
   );
 };
 

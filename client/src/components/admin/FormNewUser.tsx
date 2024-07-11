@@ -1,7 +1,11 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { addUser } from "../../store/reducers/admin/getUsers";
-import { notification } from "antd";
+import { Form, Input, Button, notification, Select } from "antd";
+import { UserOutlined, MailOutlined, LockOutlined } from "@ant-design/icons";
+import baseUrl from "../../api/api";
+
+const { Option } = Select;
 
 const NewUserForm = ({
   setModalVisible,
@@ -9,116 +13,199 @@ const NewUserForm = ({
   setModalVisible: (visible: boolean) => void;
 }) => {
   const dispatch = useDispatch();
-  const [newUser, setNewUser] = useState({
-    name: "",
-    email: "",
-    profilePicture: "",
-    role: 0,
-    status: true,
-    password: "",
-    confirmPassword: "",
-  });
+  const [form] = Form.useForm();
+  const [loading, setLoading] = useState(false);
 
-  const handleAddUser = (e: any) => {
-    e.preventDefault();
-    dispatch(addUser(newUser));
-    setNewUser({
-      name: "",
-      email: "",
-      profilePicture: "",
-      role: 0,
-      status: true,
-      password: "",
-      confirmPassword: "",
-    });
-    setModalVisible(false);
-    notification.success({
-      message: "Thành công",
-      description: "Thêm mới thành công",
-    });
+  const checkEmailExists = async (email: string) => {
+    try {
+      const response = await baseUrl.get(`users?email=${email}`);
+      return response.data.length > 0;
+    } catch (error) {
+      console.error("Error checking email:", error);
+      return false;
+    }
+  };
+
+  const handleAddUser = async (values: any) => {
+    setLoading(true);
+    try {
+      const emailExists = await checkEmailExists(values.email);
+      if (emailExists) {
+        throw new Error("Email đã được sử dụng");
+      }
+
+      const newUser = {
+        name: values.name,
+        email: values.email,
+        profilePicture:
+          "https://static.vecteezy.com/system/resources/previews/009/734/564/original/default-avatar-profile-icon-of-social-media-user-vector.jpg",
+        role: values.role,
+        status: true,
+        password: values.password,
+      };
+
+      if (newUser) {
+        dispatch(addUser(newUser));
+        setModalVisible(false);
+        notification.success({
+          message: "Thành công",
+          description: "Thêm mới người dùng thành công",
+        });
+        form.resetFields();
+      } else {
+        throw new Error("Không thể thêm người dùng");
+      }
+    } catch (error: any) {
+      notification.error({
+        message: "Thêm mới thất bại",
+        description: error.message || "Có lỗi xảy ra. Vui lòng thử lại.",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 space-y-6">
-        <h2 className="text-2xl font-bold mb-4 text-center">
+      <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-6">
+        <h2 className="text-2xl font-bold mb-6 text-center">
           Thêm mới người dùng
         </h2>
-        <form onSubmit={handleAddUser} className="space-y-4">
-          <div className="flex flex-col space-y-2">
-            <label className="text-gray-700 font-medium">Họ và tên</label>
-            <input
-              type="text"
-              value={newUser.name}
-              onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
-              className="py-2 px-4 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        <Form
+          form={form}
+          name="newUser"
+          onFinish={handleAddUser}
+          layout="vertical"
+        >
+          <Form.Item
+            name="name"
+            label="Họ và tên"
+            rules={[
+              {
+                required: true,
+                message: "Vui lòng nhập họ và tên!",
+              },
+            ]}
+          >
+            <Input
+              prefix={<UserOutlined className="site-form-item-icon" />}
+              placeholder="Nhập họ và tên"
             />
-          </div>
-          <div className="flex flex-col space-y-2">
-            <label className="text-gray-700 font-medium">Email</label>
-            <input
-              type="email"
-              value={newUser.email}
-              onChange={(e) =>
-                setNewUser({ ...newUser, email: e.target.value })
-              }
-              className="py-2 px-4 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          </Form.Item>
+
+          <Form.Item
+            name="email"
+            label="Địa chỉ email"
+            rules={[
+              {
+                type: "email",
+                message: "Email không đúng định dạng!",
+              },
+              {
+                required: true,
+                message: "Vui lòng nhập email!",
+              },
+              {
+                validator: async (_, value) => {
+                  if (value) {
+                    const exists = await checkEmailExists(value);
+                    if (exists) {
+                      return Promise.reject("Email đã được sử dụng");
+                    }
+                  }
+                  return Promise.resolve();
+                },
+              },
+            ]}
+          >
+            <Input
+              prefix={<MailOutlined className="site-form-item-icon" />}
+              placeholder="Nhập địa chỉ email"
             />
-          </div>
-          <div className="flex flex-col space-y-2">
-            <label className="text-gray-700 font-medium">Ảnh Đại Diện</label>
-            <input
-              type="text"
-              value={newUser.profilePicture}
-              onChange={(e) =>
-                setNewUser({
-                  ...newUser,
-                  profilePicture: e.target.value,
-                })
-              }
-              className="py-2 px-4 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          </Form.Item>
+
+          <Form.Item
+            name="password"
+            label="Mật khẩu"
+            rules={[
+              {
+                required: true,
+                message: "Vui lòng nhập mật khẩu!",
+              },
+              {
+                min: 8,
+                message: "Mật khẩu phải có ít nhất 8 ký tự!",
+              },
+            ]}
+            hasFeedback
+          >
+            <Input.Password
+              prefix={<LockOutlined className="site-form-item-icon" />}
+              placeholder="Nhập mật khẩu"
             />
-          </div>
-          <div className="flex flex-col space-y-2">
-            <label className="text-gray-700 font-medium">Mật Khẩu</label>
-            <input
-              type="password"
-              value={newUser.password}
-              onChange={(e) =>
-                setNewUser({ ...newUser, password: e.target.value })
-              }
-              className="py-2 px-4 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          </Form.Item>
+
+          <Form.Item
+            name="confirmPassword"
+            label="Xác nhận mật khẩu"
+            dependencies={["password"]}
+            hasFeedback
+            rules={[
+              {
+                required: true,
+                message: "Vui lòng xác nhận mật khẩu!",
+              },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (!value || getFieldValue("password") === value) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(new Error("Mật khẩu không khớp!"));
+                },
+              }),
+            ]}
+          >
+            <Input.Password
+              prefix={<LockOutlined className="site-form-item-icon" />}
+              placeholder="Xác nhận mật khẩu"
             />
-          </div>
-          <div className="flex flex-col space-y-2">
-            <label className="text-gray-700 font-medium">
-              Nhập lại mật khẩu
-            </label>
-            <input
-              type="password"
-              value={newUser.confirmPassword}
-              onChange={(e) =>
-                setNewUser({ ...newUser, confirmPassword: e.target.value })
-              }
-              className="py-2 px-4 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <div className="flex justify-end space-x-4">
-            <button
-              type="submit"
-              className="py-2 px-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-            >
-              Thêm mới
-            </button>
-            <button
-              type="button"
-              onClick={() => setModalVisible(false)}
-              className="py-2 px-4 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
-            >
-              Hủy
-            </button>
-          </div>
-        </form>
+          </Form.Item>
+
+          <Form.Item
+            name="role"
+            label="Vai trò"
+            rules={[
+              {
+                required: true,
+                message: "Vui lòng chọn vai trò!",
+              },
+            ]}
+          >
+            <Select placeholder="Chọn vai trò">
+              <Option value={0}>Người dùng</Option>
+              <Option value={1}>Quản trị viên</Option>
+            </Select>
+          </Form.Item>
+
+          <Form.Item>
+            <div className="flex justify-end space-x-4">
+              <Button
+                type="primary"
+                htmlType="submit"
+                loading={loading}
+                className="bg-blue-500 hover:bg-blue-600 text-white"
+              >
+                Thêm mới
+              </Button>
+              <Button
+                onClick={() => setModalVisible(false)}
+                className="bg-gray-300 hover:bg-gray-600 text-gray-800"
+              >
+                Hủy
+              </Button>
+            </div>
+          </Form.Item>
+        </Form>
       </div>
     </div>
   );

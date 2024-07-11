@@ -16,85 +16,65 @@ export default function ManageExams() {
   const navigate = useNavigate();
   const exams: Exams[] = useSelector((state: any) => state.exam.exam);
 
-  const [examData, setExamData] = useState({
+  const [newExam, setNewExam] = useState<any>({
     title: "",
     description: "",
     duration: "",
+    image:
+      "https://firebasestorage.googleapis.com/v0/b/project-df4f0.appspot.com/o/29.jpg?alt=media&token=07ec6572-9c97-41e7-bfee-e5c229a98f16",
     examSubjectId: Number(id),
   });
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isEditMode, setIsEditMode] = useState(false);
+  const [editingExam, setEditingExam] = useState<null | Exams>(null);
+  const [modalIsOpen, setModalIsOpen] = useState(false);
 
   useEffect(() => {
     dispatch(fetchExams(id));
   }, [dispatch]);
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setExamData({ ...examData, [name]: value });
+  const openModal = () => setModalIsOpen(true);
+
+  const closeModal = () => {
+    setModalIsOpen(false);
+    setEditingExam(null);
+    setNewExam({
+      title: "",
+      description: "",
+      duration: "",
+      image:
+        "https://firebasestorage.googleapis.com/v0/b/project-df4f0.appspot.com/o/29.jpg?alt=media&token=07ec6572-9c97-41e7-bfee-e5c229a98f16",
+      examSubjectId: Number(id),
+    });
   };
 
   const handleAddExam = () => {
-    if (examData.title && examData.description && examData.duration) {
-      dispatch(addExam({ ...examData, duration: parseInt(examData.duration) }));
-      setExamData({
-        title: "",
-        description: "",
-        duration: "",
-        examSubjectId: Number(id),
-      });
-      setIsModalOpen(false);
-    }
+    dispatch(addExam({ ...newExam, duration: parseInt(newExam.duration) }));
+    closeModal();
   };
 
-  const handleEditExam = () => {
-    if (examData.title && examData.description && examData.duration) {
-      dispatch(
-        editExam({ ...examData, duration: parseInt(examData.duration) })
-      );
-      setExamData({
-        title: "",
-        description: "",
-        duration: "",
-        examSubjectId: Number(id),
-      });
-      setIsModalOpen(false);
-    }
+  const handleEditExam = (exam: Exams) => {
+    setEditingExam(exam);
+    setNewExam(exam);
+    openModal();
+  };
+
+  const handleSaveExam = () => {
+    dispatch(editExam({ ...newExam, duration: parseInt(newExam.duration) }));
+    closeModal();
   };
 
   const handleDeleteExam = (examId: number) => {
     dispatch(deleteExam(examId));
   };
 
-  const openAddModal = () => {
-    setExamData({
-      title: "",
-      description: "",
-      duration: "",
-      examSubjectId: Number(id),
-    });
-    setIsEditMode(false);
-    setIsModalOpen(true);
-  };
-
-  const openEditModal = (exam: any) => {
-    setExamData(exam);
-    setIsEditMode(true);
-    setIsModalOpen(true);
-  };
-
   const handleNext = (id: number) => {
     navigate(`/admin/coursesAd/subjectAd/examAd/questionAd/${id}`);
   };
-
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Quản Lý Đề Thi</h1>
       <button
-        className="bg-violet-800 text-white px-4 py-2 rounded mb-4"
-        onClick={openAddModal}
+        onClick={openModal}
+        className="bg-violet-600 text-white px-4 py-2 rounded mb-4"
       >
         Thêm Mới
       </button>
@@ -103,6 +83,7 @@ export default function ManageExams() {
           <tr>
             <th className="py-2 px-4 border-b">STT</th>
             <th className="py-2 px-4 border-b">Tiêu Đề</th>
+            <th className="py-2 px-4 border-b">Hình Ảnh</th>
             <th className="py-2 px-4 border-b">Mô Tả</th>
             <th className="py-2 px-4 border-b">Thời Gian Thi (phút)</th>
             <th className="py-2 px-4 border-b">Chức Năng</th>
@@ -110,23 +91,43 @@ export default function ManageExams() {
         </thead>
         <tbody>
           {exams.map((exam: Exams, index: number) => (
-            <tr key={exam.id} onClick={() => handleNext(exam.id)}>
+            <tr key={exam.id}>
               <td className="py-2 px-4 border-b text-center">{index + 1}</td>
-              <td className="py-2 px-4 border-b">{exam.title}</td>
-              <td className="py-2 px-4 border-b">{exam.description}</td>
+              <td
+                className="py-2 px-4 border-b text-center"
+                onClick={() => handleNext(exam.id)}
+              >
+                {exam.title}
+              </td>
+              <td className="py-2 px-4 border-b text-center">
+                <img
+                  src={exam.image}
+                  alt={exam.title}
+                  className="rounded-50 w-10 h-10 object-cover mx-auto"
+                />
+              </td>
+              <td className="py-2 px-4 border-b text-center">
+                {exam.description}
+              </td>
               <td className="py-2 px-4 border-b text-center">
                 {exam.duration}
               </td>
               <td className="py-2 px-4 border-b text-center">
                 <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleEditExam(exam);
+                  }}
                   className="bg-yellow-400 text-white px-4 py-2 rounded mr-2"
-                  onClick={() => openEditModal(exam)}
                 >
                   Sửa
                 </button>
                 <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteExam(exam.id);
+                  }}
                   className="bg-red-500 text-white px-4 py-2 rounded"
-                  onClick={() => handleDeleteExam(exam.id)}
                 >
                   Xóa
                 </button>
@@ -136,15 +137,14 @@ export default function ManageExams() {
         </tbody>
       </table>
 
-      {isModalOpen && (
-        <ExamModal
-          isEditMode={isEditMode}
-          examData={examData}
-          handleInputChange={handleInputChange}
-          handleSubmit={isEditMode ? handleEditExam : handleAddExam}
-          closeModal={() => setIsModalOpen(false)}
-        />
-      )}
+      <ExamModal
+        isOpen={modalIsOpen}
+        closeModal={closeModal}
+        exam={newExam}
+        setExam={setNewExam}
+        handleSave={editingExam ? handleSaveExam : handleAddExam}
+        isEditing={!!editingExam}
+      />
     </div>
   );
 }

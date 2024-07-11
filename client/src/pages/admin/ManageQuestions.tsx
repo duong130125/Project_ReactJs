@@ -17,7 +17,8 @@ export default function ManageQuestions() {
     (state: any) => state.question.question
   );
 
-  const [questionData, setQuestionData] = useState({
+  const [questionData, setQuestionData] = useState<Questions>({
+    id: 0,
     question: "",
     examId: Number(id),
     options: ["", "", "", ""],
@@ -27,71 +28,71 @@ export default function ManageQuestions() {
   const [isEditMode, setIsEditMode] = useState(false);
 
   useEffect(() => {
-    dispatch(fetchQuestions(id));
+    dispatch(fetchQuestions(id) as any);
   }, [dispatch, id]);
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setQuestionData({ ...questionData, [name]: value });
+  const handleInputChange = (name: string, value: string) => {
+    setQuestionData((prevData) => ({ ...prevData, [name]: value }));
   };
 
   const handleOptionChange = (index: number, value: string) => {
-    const newOptions = [...questionData.options];
-    newOptions[index] = value;
-    setQuestionData({ ...questionData, options: newOptions });
+    setQuestionData((prevData) => {
+      const newOptions = [...prevData.options];
+      newOptions[index] = value;
+      return { ...prevData, options: newOptions };
+    });
+  };
+
+  const handleAnswerChange = (value: string) => {
+    setQuestionData((prevData) => ({ ...prevData, answer: value }));
   };
 
   const handleAddQuestion = () => {
-    if (
-      questionData.question &&
-      questionData.options.every((option) => option) &&
-      questionData.answer
-    ) {
-      dispatch(addQuestion(questionData));
-      resetQuestionData();
-    }
+    dispatch(addQuestion(questionData) as any);
+    resetQuestionData();
+    setIsModalOpen(false);
   };
 
   const handleEditQuestion = () => {
-    if (
-      questionData.question &&
-      questionData.options.every((option) => option) &&
-      questionData.answer
-    ) {
-      dispatch(editQuestion(questionData));
-      resetQuestionData();
-    }
+    dispatch(editQuestion(questionData) as any);
+    resetQuestionData();
+    setIsModalOpen(false);
   };
 
   const handleDeleteQuestion = (questionId: number) => {
-    dispatch(deleteQuestion(questionId));
+    dispatch(deleteQuestion(questionId) as any);
   };
 
-  const openEditModal = (question: any) => {
-    setQuestionData(question);
+  const openEditModal = (question: Questions) => {
+    setQuestionData({
+      ...question,
+      examId: Number(id),
+    });
     setIsModalOpen(true);
     setIsEditMode(true);
   };
 
   const resetQuestionData = () => {
     setQuestionData({
+      id: 0,
       question: "",
       examId: Number(id),
       options: ["", "", "", ""],
       answer: "",
     });
-    setIsModalOpen(false);
     setIsEditMode(false);
   };
+  console.log(questionData);
 
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Quản Lý Câu Hỏi</h1>
       <button
         className="bg-pink-600 text-white px-4 py-2 rounded mb-4"
-        onClick={() => setIsModalOpen(true)}
+        onClick={() => {
+          resetQuestionData();
+          setIsModalOpen(true);
+        }}
       >
         Thêm Mới
       </button>
@@ -113,7 +114,7 @@ export default function ManageQuestions() {
                 {question.question}
               </td>
               <td className="py-2 px-4 border-b text-center">
-                {question.options.join(", ")}
+                {question.options.join("; ")}
               </td>
               <td className="py-2 px-4 border-b text-center">
                 {question.answer}
@@ -137,17 +138,17 @@ export default function ManageQuestions() {
         </tbody>
       </table>
 
-      {isModalOpen && (
-        <QuestionModal
-          questionData={questionData}
-          handleInputChange={handleInputChange}
-          handleOptionChange={handleOptionChange}
-          handleAddQuestion={handleAddQuestion}
-          handleEditQuestion={handleEditQuestion}
-          setIsModalOpen={setIsModalOpen}
-          isEditMode={isEditMode}
-        />
-      )}
+      <QuestionModal
+        isOpen={isModalOpen}
+        setIsModalOpen={setIsModalOpen}
+        questionData={questionData}
+        handleInputChange={handleInputChange}
+        handleOptionChange={handleOptionChange}
+        handleAnswerChange={handleAnswerChange}
+        handleAddQuestion={handleAddQuestion}
+        handleEditQuestion={handleEditQuestion}
+        isEditMode={isEditMode}
+      />
     </div>
   );
 }

@@ -1,72 +1,117 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { Form, Input, Button, Modal } from "antd";
 
 interface ExamModalProps {
-  isEditMode: boolean;
-  examData: {
+  isOpen: boolean;
+  closeModal: () => void;
+  exam: {
     id?: number | null;
     title: string;
     description: string;
     duration: string;
   };
-  handleInputChange: (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => void;
-  handleSubmit: () => void;
-  closeModal: () => void;
+  setExam: (exam: {
+    id?: number | null;
+    title: string;
+    description: string;
+    duration: string;
+  }) => void;
+  handleSave: () => void;
+  isEditing: boolean;
 }
 
 const ExamModal: React.FC<ExamModalProps> = ({
-  isEditMode,
-  examData,
-  handleInputChange,
-  handleSubmit,
+  isOpen,
   closeModal,
+  exam,
+  setExam,
+  handleSave,
+  isEditing,
 }) => {
+  const [form] = Form.useForm();
+
+  useEffect(() => {
+    if (isOpen) {
+      form.setFieldsValue(exam);
+    } else {
+      form.resetFields();
+    }
+  }, [isOpen, exam, form]);
+
+  const onFinish = (values: {
+    title: string;
+    description: string;
+    duration: string;
+  }) => {
+    setExam(values);
+    handleSave();
+    form.resetFields();
+  };
+
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
-      <div className="bg-white p-6 rounded-lg shadow-lg">
-        <h2 className="text-xl font-bold mb-4">
-          {isEditMode ? "Chỉnh Sửa Đề Thi" : "Thêm Đề Thi Mới"}
-        </h2>
-        <input
-          type="text"
+    <Modal
+      visible={isOpen}
+      title={
+        isEditing ? (
+          <h1 className="text-2xl">Chỉnh Sửa Đề Thi</h1>
+        ) : (
+          <h1 className="text-2xl">Thêm Đề Thi Mới</h1>
+        )
+      }
+      onCancel={closeModal}
+      footer={null}
+    >
+      <Form
+        form={form}
+        initialValues={exam}
+        onFinish={onFinish}
+        layout="vertical"
+      >
+        <Form.Item
           name="title"
-          value={examData.title}
-          onChange={handleInputChange}
-          placeholder="Tiêu Đề"
-          className="w-full p-2 border border-gray-300 rounded mb-4"
-        />
-        <textarea
+          label="Tiêu Đề"
+          rules={[{ required: true, message: "Tiêu đề không được để trống" }]}
+        >
+          <Input
+            placeholder="Tiêu Đề"
+            onChange={(e) => setExam({ ...exam, title: e.target.value })}
+          />
+        </Form.Item>
+        <Form.Item
           name="description"
-          value={examData.description}
-          onChange={handleInputChange}
-          placeholder="Mô Tả"
-          className="w-full p-2 border border-gray-300 rounded mb-4"
-        />
-        <input
-          type="number"
+          label="Mô Tả"
+          rules={[{ required: true, message: "Mô tả không được để trống" }]}
+        >
+          <Input.TextArea
+            placeholder="Mô Tả"
+            onChange={(e) => setExam({ ...exam, description: e.target.value })}
+          />
+        </Form.Item>
+        <Form.Item
           name="duration"
-          value={examData.duration}
-          onChange={handleInputChange}
-          placeholder="Thời Gian Thi (phút)"
-          className="w-full p-2 border border-gray-300 rounded mb-4"
-        />
-        <div className="flex justify-end space-x-4">
-          <button
-            className="bg-violet-600 text-white px-4 py-2 rounded"
-            onClick={handleSubmit}
-          >
-            {isEditMode ? "Cập Nhật" : "Thêm Mới"}
-          </button>
-          <button
-            className="bg-gray-500 text-white px-4 py-2 rounded mr-2"
-            onClick={closeModal}
-          >
-            Hủy
-          </button>
-        </div>
-      </div>
-    </div>
+          label="Thời Gian Thi (phút)"
+          rules={[
+            { required: true, message: "Thời gian thi không được để trống" },
+          ]}
+        >
+          <Input
+            type="number"
+            placeholder="Thời Gian Thi (phút)"
+            onChange={(e) => setExam({ ...exam, duration: e.target.value })}
+          />
+        </Form.Item>
+        <Form.Item>
+          <div className="flex justify-end space-x-4">
+            <Button htmlType="submit" className="bg-violet-600 text-white">
+              {isEditing ? "Cập Nhật" : "Thêm Mới"}
+            </Button>
+            <Button onClick={closeModal} className="bg-gray-500 text-white">
+              Hủy
+            </Button>
+          </div>
+        </Form.Item>
+      </Form>
+    </Modal>
   );
 };
 

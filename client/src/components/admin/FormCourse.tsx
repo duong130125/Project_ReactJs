@@ -1,10 +1,15 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { Form, Input, Button, Modal } from "antd";
 
 interface CourseFormModalProps {
   isOpen: boolean;
   closeModal: () => void;
   course: { title: string; description: string };
-  setCourse: (course: { title: string; description: string }) => void;
+  setCourse: (course: {
+    title: string;
+    description: string;
+    image?: string;
+  }) => void;
   handleSave: () => void;
   isEditing: boolean;
 }
@@ -17,63 +22,75 @@ const CourseFormModal: React.FC<CourseFormModalProps> = ({
   handleSave,
   isEditing,
 }) => {
-  if (!isOpen) return null;
+  const [form] = Form.useForm();
+
+  useEffect(() => {
+    if (isOpen) {
+      form.setFieldsValue(course);
+    } else {
+      form.resetFields();
+    }
+  }, [isOpen, course, form]);
+
+  const onFinish = (values: { title: string; description: string }) => {
+    setCourse(values);
+    handleSave();
+    form.resetFields();
+  };
 
   return (
-    <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center transition-opacity duration-300 z-50">
-      <div className="bg-white p-8 rounded-lg shadow-2xl w-full max-w-lg mx-4">
-        <h2 className="text-2xl font-semibold mb-6 text-gray-800">
-          {isEditing ? "Cập Nhật Khóa Thi" : "Thêm Mới Khóa Thi"}
-        </h2>
-        <div className="mb-4">
-          <label
-            className="block text-gray-700 font-medium mb-2"
-            htmlFor="title"
-          >
-            Tiêu Đề
-          </label>
-          <input
-            id="title"
-            type="text"
-            value={course.title}
-            onChange={(e) => setCourse({ ...course, title: e.target.value })}
+    <Modal
+      visible={isOpen}
+      title={
+        isEditing ? (
+          <h1 className="text-2xl">Cập nhật Khóa thi</h1>
+        ) : (
+          <h1 className="text-2xl">Thêm mới Khóa thi</h1>
+        )
+      }
+      onCancel={closeModal}
+      footer={null}
+    >
+      <Form
+        form={form}
+        initialValues={course}
+        onFinish={onFinish}
+        layout="vertical"
+      >
+        <Form.Item
+          name="title"
+          label="Tiêu Đề"
+          rules={[{ required: true, message: "Tiêu đề không được để trống" }]}
+        >
+          <Input
             placeholder="Tiêu Đề"
-            className="border border-gray-300 p-3 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            onChange={(e) => setCourse({ ...course, title: e.target.value })}
           />
-        </div>
-        <div className="mb-6">
-          <label
-            className="block text-gray-700 font-medium mb-2"
-            htmlFor="description"
-          >
-            Mô Tả
-          </label>
-          <textarea
-            id="description"
-            value={course.description}
+        </Form.Item>
+        <Form.Item
+          name="description"
+          label="Mô Tả"
+          rules={[{ required: true, message: "Mô tả không được để trống" }]}
+        >
+          <Input.TextArea
+            placeholder="Mô Tả"
             onChange={(e) =>
               setCourse({ ...course, description: e.target.value })
             }
-            placeholder="Mô Tả"
-            className="border border-gray-300 p-3 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-        </div>
-        <div className="flex justify-end space-x-4">
-          <button
-            onClick={handleSave}
-            className="bg-green-600 text-white px-5 py-2 rounded-lg shadow hover:bg-blue-700 transition-colors duration-200"
-          >
-            {isEditing ? "Cập nhật" : "Thêm Mới"}
-          </button>
-          <button
-            onClick={closeModal}
-            className="bg-gray-600 text-white px-5 py-2 rounded-lg shadow hover:bg-gray-700 transition-colors duration-200"
-          >
-            Hủy
-          </button>
-        </div>
-      </div>
-    </div>
+        </Form.Item>
+        <Form.Item>
+          <div className="flex justify-end space-x-4">
+            <Button htmlType="submit" className="bg-green-600 text-white">
+              {isEditing ? "Cập nhật" : "Thêm Mới"}
+            </Button>
+            <Button onClick={closeModal} className="bg-gray-600 text-white">
+              Hủy
+            </Button>
+          </div>
+        </Form.Item>
+      </Form>
+    </Modal>
   );
 };
 

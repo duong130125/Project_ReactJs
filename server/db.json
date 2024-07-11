@@ -1,129 +1,55 @@
 {
-  "users": [],
-  "courses": [
+  "users": [
     {
-      "title": "dfyfhf",
-      "description": "ghfghfghf",
+      "name": "phạm trung hiếu",
+      "email": "hieu@gmail.com",
+      "profilePicture": "https://static.vecteezy.com/system/resources/previews/009/734/564/original/default-avatar-profile-icon-of-social-media-user-vector.jpg",
+      "role": 0,
+      "status": true,
+      "password": "741852963",
       "id": 1
     },
     {
-      "title": "fdgdfg",
-      "description": "fdgfdgdf",
+      "name": "nguyễn đình dương",
+      "email": "hieu455âsas@gmail.com",
+      "profilePicture": "https://static.vecteezy.com/system/resources/previews/009/734/564/original/default-avatar-profile-icon-of-social-media-user-vector.jpg",
+      "role": 0,
+      "status": true,
+      "password": "456789123",
+      "id": 2
+    }
+  ],
+  "courses": [
+    {
+      "title": "sad",
+      "description": "ádsadas",
+      "image": "https://firebasestorage.googleapis.com/v0/b/project-df4f0.appspot.com/o/12%20(1).jpg?alt=media&token=8f0c559f-6aa4-4316-ab5b-8a6634e8e67d",
+      "id": 1
+    },
+    {
+      "title": "gsfdgdfg",
+      "description": "fdgfdgfdgfd",
+      "image": "https://firebasestorage.googleapis.com/v0/b/project-df4f0.appspot.com/o/12%20(1).jpg?alt=media&token=8f0c559f-6aa4-4316-ab5b-8a6634e8e67d",
       "id": 2
     }
   ],
   "examSubjects": [
     {
-      "id": 1,
-      "title": "rgdfg",
-      "description": "fdgdfgdf",
-      "courseId": 1
-    },
-    {
-      "id": 2,
-      "title": "dfgdfgfd",
-      "description": "dfgdfgfdg",
-      "courseId": 1
-    },
-    {
-      "id": 3,
-      "title": "sdfsdfsd",
-      "description": "fsdfsdfsd",
-      "courseId": 2
-    },
-    {
-      "id": 4,
-      "title": "dsfsdfsd",
-      "description": "fdfsdfsdfsd",
-      "courseId": 2
-    }
-  ],
-  "exams": [
-    {
-      "id": 1,
-      "title": "dsfsdfsd",
-      "description": "fdsfsdfsd",
-      "duration": 15554,
-      "examSubjectId": 1
-    },
-    {
-      "id": 2,
-      "title": "sdfsd",
-      "description": "fsdfsd",
-      "duration": 14,
-      "examSubjectId": 4
-    },
-    {
-      "id": 3,
-      "title": "ádsad",
-      "description": "ádas",
-      "duration": 245,
-      "examSubjectId": 4
-    },
-    {
-      "id": 4,
-      "title": "45242",
-      "description": "fdgdfgfdg",
-      "duration": 42424,
-      "examSubjectId": 4
-    },
-    {
-      "title": "sà",
-      "description": "âfsafa",
-      "duration": 52454,
-      "examSubjectId": 2,
-      "id": 5
-    }
-  ],
-  "questions": [
-    {
-      "question": "dsfsdfsdf",
-      "examId": 5,
-      "options": [
-        "sdfsdfsd",
-        "sdfsdfsd",
-        "fsdfsdfsd",
-        "fsdfsdfs"
-      ],
-      "answer": "sdfsdfsd",
+      "title": "saSA",
+      "description": "saSAsA",
+      "image": "https://firebasestorage.googleapis.com/v0/b/project-df4f0.appspot.com/o/12%20(1).jpg?alt=media&token=8f0c559f-6aa4-4316-ab5b-8a6634e8e67d",
+      "courseId": 2,
       "id": 2
     },
     {
-      "question": "sdfsdfsd",
-      "examId": 1,
-      "options": [
-        "áddad",
-        "áddad",
-        "ádasd",
-        "ádasdas"
-      ],
-      "answer": "sdfsdfsd",
+      "title": "đâsd",
+      "description": "ádasdas",
+      "image": "https://firebasestorage.googleapis.com/v0/b/project-df4f0.appspot.com/o/20.jpg?alt=media&token=a41bd001-b347-4d45-876e-b408f734a36a",
+      "courseId": 1,
       "id": 3
-    },
-    {
-      "question": "sdsadas",
-      "examId": 1,
-      "options": [
-        "đâsd",
-        "ádasd",
-        "ádasdas",
-        "dsadas"
-      ],
-      "answer": "sdfsdfsd",
-      "id": 4
-    },
-    {
-      "question": "sdfsdfsd",
-      "examId": 1,
-      "options": [
-        "dfgdfgdfg",
-        "gdfgdf",
-        "gdfgdf",
-        "gdfgdfg"
-      ],
-      "answer": "fdgdfgdfgdf",
-      "id": 5
     }
   ],
+  "exams": [],
+  "questions": [],
   "userAnswers": []
 }

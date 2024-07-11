@@ -1,81 +1,131 @@
-import React, { ChangeEvent } from "react";
+import React, { useEffect } from "react";
+import { Form, Input, Button, Modal, Select } from "antd";
+import { Questions } from "../../interfaces/Users";
+
+const { Option } = Select;
 
 interface QuestionModalProps {
-  questionData: {
-    question: string;
-    examId: number | null;
-    options: string[];
-    answer: string;
-  };
-  handleInputChange: (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => void;
+  isOpen: boolean;
+  setIsModalOpen: (isOpen: boolean) => void;
+  questionData: Questions;
+  handleInputChange: (name: string, value: string) => void;
   handleOptionChange: (index: number, value: string) => void;
+  handleAnswerChange: (value: string) => void;
   handleAddQuestion: () => void;
   handleEditQuestion: () => void;
-  setIsModalOpen: (isOpen: boolean) => void;
   isEditMode: boolean;
 }
 
 const QuestionModal: React.FC<QuestionModalProps> = ({
+  isOpen,
+  setIsModalOpen,
   questionData,
   handleInputChange,
   handleOptionChange,
+  handleAnswerChange,
   handleAddQuestion,
   handleEditQuestion,
-  setIsModalOpen,
   isEditMode,
 }) => {
+  const [form] = Form.useForm();
+
+  useEffect(() => {
+    form.setFieldsValue(questionData);
+  }, [form, questionData]);
+
+  const handleSave = () => {
+    form
+      .validateFields()
+      .then(() => {
+        if (isEditMode) {
+          handleEditQuestion();
+        } else {
+          handleAddQuestion();
+        }
+        setIsModalOpen(false);
+      })
+      .catch((error) => {
+        console.error("Validate Failed:", error);
+      });
+  };
+
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
-      <div className="bg-white p-6 rounded-lg shadow-lg">
-        <h2 className="text-xl font-bold mb-4">
-          {isEditMode ? "Chỉnh Sửa Câu Hỏi" : "Thêm Câu Hỏi Mới"}
-        </h2>
-        <input
-          type="text"
+    <Modal
+      visible={isOpen}
+      title={isEditMode ? "Chỉnh Sửa Câu Hỏi" : "Thêm Câu Hỏi Mới"}
+      onCancel={() => setIsModalOpen(false)}
+      footer={null}
+    >
+      <Form
+        form={form}
+        layout="vertical"
+        onFinish={handleSave}
+        initialValues={questionData}
+      >
+        <Form.Item
           name="question"
-          value={questionData.question}
-          onChange={handleInputChange}
-          placeholder="Câu Hỏi"
-          className="w-full p-2 border border-gray-300 rounded mb-4"
-        />
-        <div className="space-y-2">
-          {questionData.options.map((option, index) => (
-            <input
-              key={index}
-              type="text"
+          label="Câu Hỏi"
+          rules={[{ required: true, message: "Câu hỏi không được để trống" }]}
+        >
+          <Input
+            placeholder="Câu Hỏi"
+            onChange={(e) => handleInputChange("question", e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded mb-4"
+          />
+        </Form.Item>
+
+        {questionData.options.map((option, index) => (
+          <Form.Item
+            key={index}
+            name={["options", index]}
+            label={`Đáp Án ${index + 1}`}
+            rules={[{ required: true, message: "Đáp án không được để trống" }]}
+          >
+            <Input
               value={option}
               onChange={(e) => handleOptionChange(index, e.target.value)}
               placeholder={`Đáp Án ${index + 1}`}
               className="w-full p-2 border border-gray-300 rounded"
             />
-          ))}
-        </div>
-        <input
-          type="text"
+          </Form.Item>
+        ))}
+
+        <Form.Item
           name="answer"
-          value={questionData.answer}
-          onChange={handleInputChange}
-          placeholder="Đáp Án Đúng"
-          className="w-full p-2 border border-gray-300 rounded mt-4 mb-4"
-        />
+          label="Đáp Án Đúng"
+          rules={[
+            { required: true, message: "Đáp án đúng không được để trống" },
+          ]}
+        >
+          <Select
+            placeholder="Chọn đáp án đúng"
+            onChange={handleAnswerChange}
+            className="w-full"
+          >
+            {questionData.options.map((option, index) => (
+              <Option key={index} value={option}>
+                {option}
+              </Option>
+            ))}
+          </Select>
+        </Form.Item>
+
         <div className="flex justify-end space-x-4">
-          <button
+          <Button
+            onClick={handleSave}
             className="bg-pink-600 text-white px-4 py-2 rounded"
-            onClick={isEditMode ? handleEditQuestion : handleAddQuestion}
           >
             {isEditMode ? "Cập Nhật" : "Thêm mới"}
-          </button>
-          <button
-            className="bg-gray-500 text-white px-4 py-2 rounded mr-2"
+          </Button>
+          <Button
             onClick={() => setIsModalOpen(false)}
+            className="bg-gray-500 text-white px-4 py-2 rounded mr-2"
           >
             Hủy
-          </button>
+          </Button>
         </div>
-      </div>
-    </div>
+      </Form>
+    </Modal>
   );
 };
 

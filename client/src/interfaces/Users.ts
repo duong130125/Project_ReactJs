@@ -11,12 +11,14 @@ export interface Users {
 export interface Courses {
   id: number;
   title: string;
+  image: string;
   description: string;
 }
 
 export interface ExamSubjects {
   id: number;
   title: string;
+  image: string;
   description: string;
   courseId: number;
 }
@@ -24,6 +26,7 @@ export interface ExamSubjects {
 export interface Exams {
   id: number;
   title: string;
+  image: string;
   description: string;
   duration: number;
   examSubjectId: number;
