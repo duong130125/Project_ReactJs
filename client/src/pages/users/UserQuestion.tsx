@@ -9,7 +9,6 @@ import baseUrl from "../../api/api";
 export default function UserQuestion() {
   const [time, setTime] = useState(0);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [correctAnswers, setCorrectAnswers] = useState<number[]>([]);
   const [userAnswers, setUserAnswers] = useState<{ [key: number]: string }>({});
   const [initialTime, setInitialTime] = useState<number>(0);
 
@@ -33,9 +32,16 @@ export default function UserQuestion() {
     let timeUserLocal = localStorage.getItem("timeUser");
     if (timeUserLocal && !isSubmitted) {
       setTime(parseInt(timeUserLocal, 10));
+      setInitialTime(currentExam.duration * 60);
     } else {
       setInitialTime(currentExam.duration * 60);
       setTime(currentExam.duration * 60);
+    }
+
+    // Khôi phục câu trả lời từ localStorage khi mount lại
+    const storedAnswers = localStorage.getItem("userAnswers");
+    if (storedAnswers) {
+      setUserAnswers(JSON.parse(storedAnswers));
     }
   }, [currentExam, isSubmitted]);
 
@@ -62,11 +68,14 @@ export default function UserQuestion() {
     return `${minutes}:${remainingSeconds < 10 ? "0" : ""}${remainingSeconds}`;
   };
 
+  // hàm nộp bài
   const handleSubmit = () => {
     setIsSubmitted(true);
     const getTime = localStorage.getItem("timeUser");
-    const totalQuestions = questions.length; //tổng câu hỏi
-    const correct = correctAnswers.length; //câu đúng
+    const totalQuestions = questions.length; // tổng câu hỏi
+    const correct = questions.filter(
+      (question) => userAnswers[question.id] === question.answer
+    ).length; // câu đúng
     const incorrect = totalQuestions - correct; // câu sai
     const score = Math.round((correct / totalQuestions) * 10); // xử lý điểm
     const timeTaken = initialTime - Number(getTime); // thời gian làm bài
@@ -99,27 +108,18 @@ export default function UserQuestion() {
       },
     });
     localStorage.removeItem("timeUser");
+    localStorage.removeItem("userAnswers");
   };
 
   // hàm check kết quả
   const handleOptionChange = (questionId: number, option: string) => {
-    setUserAnswers((prevAnswers) => ({
-      ...prevAnswers,
+    const newAnswers = {
+      ...userAnswers,
       [questionId]: option,
-    }));
+    };
 
-    const question = questions.find((q) => q.id === questionId);
-    if (question && question.answer === option) {
-      setCorrectAnswers((prevCorrect) =>
-        prevCorrect.includes(questionId)
-          ? prevCorrect
-          : [...prevCorrect, questionId]
-      );
-    } else {
-      setCorrectAnswers((prevCorrect) =>
-        prevCorrect.filter((id) => id !== questionId)
-      );
-    }
+    setUserAnswers(newAnswers);
+    localStorage.setItem("userAnswers", JSON.stringify(newAnswers)); // Lưu câu trả lời vào localStorage
   };
 
   return (
