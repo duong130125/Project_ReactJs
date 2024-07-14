@@ -31,9 +31,22 @@ export default function ManageSubjects() {
   );
   const [modalIsOpen, setModalIsOpen] = useState<boolean>(false);
 
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [perPage] = useState(10);
+
   useEffect(() => {
     dispatch(fetchSubjects(id));
-  }, [dispatch]);
+  }, [dispatch, id]);
+
+  // Pagination logic
+  const indexOfLastSubject = currentPage * perPage;
+  const indexOfFirstSubject = indexOfLastSubject - perPage;
+  const currentSubjects = subjects.slice(
+    indexOfFirstSubject,
+    indexOfLastSubject
+  );
+  const totalPages = Math.ceil(subjects.length / perPage);
 
   const openModal = () => setModalIsOpen(true);
 
@@ -73,6 +86,18 @@ export default function ManageSubjects() {
     navigate(`/admin/coursesAd/subjectAd/examAd/${id}`);
   };
 
+  const navigateToPage = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const changePage = (direction: "prev" | "next") => {
+    if (direction === "prev" && currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    } else if (direction === "next" && currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Quản Lý Môn Thi</h1>
@@ -93,9 +118,11 @@ export default function ManageSubjects() {
           </tr>
         </thead>
         <tbody>
-          {subjects.map((subject: ExamSubjects, index: number) => (
+          {currentSubjects.map((subject: ExamSubjects, index: number) => (
             <tr key={subject.id}>
-              <td className="py-2 px-4 border-b text-center">{index + 1}</td>
+              <td className="py-2 px-4 border-b text-center">
+                {indexOfFirstSubject + index + 1}
+              </td>
               <td
                 className="py-2 px-4 border-b text-center"
                 onClick={() => handleNext(subject.id)}
@@ -136,6 +163,47 @@ export default function ManageSubjects() {
           ))}
         </tbody>
       </table>
+
+      {/* Pagination */}
+      <div className="flex justify-center mt-4">
+        <nav className="inline-flex">
+          <button
+            onClick={() => changePage("prev")}
+            disabled={currentPage === 1}
+            className={`px-3 py-1 rounded-l-lg ${
+              currentPage === 1
+                ? "bg-gray-300 text-gray-600"
+                : "bg-white text-blue-500 hover:bg-blue-100"
+            } border border-gray-300`}
+          >
+            ‹
+          </button>
+          {[...Array(totalPages).keys()].map((page) => (
+            <button
+              key={page + 1}
+              onClick={() => navigateToPage(page + 1)}
+              className={`px-3 py-1 ${
+                currentPage === page + 1
+                  ? "bg-blue-500 text-white"
+                  : "bg-white text-blue-500 hover:bg-blue-100"
+              } border-t border-b border-gray-300`}
+            >
+              {page + 1}
+            </button>
+          ))}
+          <button
+            onClick={() => changePage("next")}
+            disabled={currentPage === totalPages}
+            className={`px-3 py-1 rounded-r-lg ${
+              currentPage === totalPages
+                ? "bg-gray-300 text-gray-600"
+                : "bg-white text-blue-500 hover:bg-blue-100"
+            } border border-gray-300`}
+          >
+            ›
+          </button>
+        </nav>
+      </div>
 
       <SubjectModal
         isOpen={modalIsOpen}

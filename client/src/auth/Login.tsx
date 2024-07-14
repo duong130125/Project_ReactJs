@@ -15,8 +15,6 @@ export default function Login() {
     const fetchUsers = async () => {
       try {
         const response = await baseUrl.get("users");
-        console.log(response);
-
         setUsers(response.data);
       } catch (error) {
         console.error("Lỗi khi lấy dữ liệu người dùng:", error);
@@ -34,6 +32,8 @@ export default function Login() {
       const userInfo = {
         id: user.id,
         email: user.email,
+        name: user.name, // Assuming the user object has a name property
+        profilePicture: user.profilePicture, // Assuming the user object has an avatar property
         role: user.role,
       };
 

@@ -4,16 +4,31 @@ import Login from "./auth/Login";
 import Register from "./auth/Register";
 import Home from "./pages/users/Home";
 import NotFound from "./components/NotFound";
+import UserQuestion from "./pages/users/UserQuestion";
+import UserPage from "./pages/users/UserPage";
+import ResultUser from "./pages/users/ResultUser";
 
 export default function App() {
   return (
     <>
       <Routes>
-        <Route path="/" element={<Home />}></Route>
+        <Route path="/*" element={<Home />}></Route>
         <Route path="/admin/*" element={<HomeAdmin />}></Route>
         <Route path="/login" element={<Login />}></Route>
         <Route path="/register" element={<Register />}></Route>
         <Route path="*" element={<NotFound />}></Route>
+        <Route path="/userQuestion/:id" element={<UserQuestion />}></Route>
+        <Route path="/results" element={<ResultUser />} />
+        <Route
+          path="/userHome"
+          element={
+            <UserPage
+              name="Nguyễn Văn A"
+              email="nguyenvana@example.com"
+              avatarUrl="https://example.com/path-to-avatar.jpg"
+            />
+          }
+        ></Route>
       </Routes>
     </>
   );

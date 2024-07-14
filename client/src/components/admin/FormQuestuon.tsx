@@ -52,7 +52,13 @@ const QuestionModal: React.FC<QuestionModalProps> = ({
   return (
     <Modal
       visible={isOpen}
-      title={isEditMode ? "Chỉnh Sửa Câu Hỏi" : "Thêm Câu Hỏi Mới"}
+      title={
+        isEditMode ? (
+          <h1 className="text-2xl">Chỉnh sửa câu hỏi</h1>
+        ) : (
+          <h1 className="text-2xl">Thêm mới câu hỏi</h1>
+        )
+      }
       onCancel={() => setIsModalOpen(false)}
       footer={null}
     >

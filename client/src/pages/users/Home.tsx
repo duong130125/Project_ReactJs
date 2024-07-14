@@ -3,10 +3,10 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Footer from "../../layout/Footer";
 import Header from "../../layout/Header";
-import { useDispatch, useSelector } from "react-redux";
-import { useEffect } from "react";
-import { getCoursesUser } from "../../store/reducers/users/courses";
-import { Courses } from "../../interfaces/Users";
+import { Route, Routes } from "react-router-dom";
+import UserCourses from "./UserCourses";
+import UserSubject from "./UserSubject";
+import UserExam from "./UserExam";
 
 export default function Home() {
   const settings = {
@@ -18,15 +18,6 @@ export default function Home() {
     slidesToShow: 1,
     slidesToScroll: 1,
   };
-
-  const dispatch = useDispatch();
-  const courses: Courses[] = useSelector(
-    (state: any) => state.userCourse.userCourse
-  );
-
-  useEffect(() => {
-    dispatch(getCoursesUser());
-  }, [dispatch]);
 
   return (
     <>
@@ -91,43 +82,35 @@ export default function Home() {
                 <li className="hover:text-blue-600 transition-colors">
                   Toán 5 - Bài toán tỉ lệ (Tỉ lệ thuận - tỉ lệ nghịch)
                 </li>
+                <li className="hover:text-blue-600 transition-colors">
+                  Toán 8 - Kết nối tri thức với cuộc sống
+                </li>
+                <li className="hover:text-blue-600 transition-colors">
+                  Toán 8 - Chân trời sáng tạo
+                </li>
+                <li className="hover:text-blue-600 transition-colors">
+                  Toán 8 - Cùng khám phá
+                </li>
+                <li className="hover:text-blue-600 transition-colors">
+                  Toán 9 - Căn thức bậc hai và hằng đẳng thức
+                </li>
+                <li className="hover:text-blue-600 transition-colors">
+                  Toán 9 - Bảng căn bậc hai
+                </li>
               </ul>
             </aside>
 
-            <div className="w-full lg:w-3/4">
-              <div className="flex justify-between items-center mb-8">
-                <h3 className="text-3xl font-bold text-blue-800">
-                  Các khóa học
-                </h3>
-                <div className="w-full max-w-md">
-                  <input
-                    type="text"
-                    placeholder="Tìm kiếm khóa học"
-                    className="w-full px-4 py-2 border border-blue-300 rounded-xl focus:outline-none focus:border-blue-500 shadow-md"
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {courses.map((course) => (
-                  <div
-                    key={course.id}
-                    className="bg-white shadow-lg rounded-xl overflow-hidden transition-transform duration-300 hover:scale-105"
-                  >
-                    <img
-                      // src={course.imageUrl}
-                      alt={course.title}
-                      className="w-full h-40 object-cover"
-                    />
-                    <div className="p-4">
-                      <h4 className="font-bold text-xl mb-2 text-blue-800">
-                        {course.title}
-                      </h4>
-                      <p className="text-gray-700">{course.description}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <Routes>
+              <Route path="/" element={<UserCourses />}></Route>
+              <Route
+                path="courseUser/userSubject/:id"
+                element={<UserSubject />}
+              ></Route>
+              <Route
+                path="courseUser/userSubject/userExam/:id"
+                element={<UserExam />}
+              ></Route>
+            </Routes>
           </div>
         </main>
         <Footer />

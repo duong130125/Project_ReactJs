@@ -46,3 +46,17 @@ export interface userAnswers {
   exampId: number;
   score: number;
 }
+
+export interface LocationState {
+  correct: number;
+  incorrect: number;
+  time: number;
+  score: number;
+}
+
+export interface ResultCardProps {
+  title: string;
+  value: number | string;
+  icon: string;
+  highlight?: boolean;
+}

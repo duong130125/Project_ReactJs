@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Users } from "../../interfaces/Users";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getUserAd,
@@ -9,13 +8,18 @@ import {
   sortUsers,
 } from "../../store/reducers/admin/getUsers";
 import NewUserForm from "../../components/admin/FormNewUser";
+import { Users } from "../../interfaces/Users";
 
 export default function ManageUser() {
-  const getData: Users[] = useSelector((state: any) => state.user.user);
   const dispatch = useDispatch();
+  const allUsers: Users[] = useSelector((state: any) => state.user.user);
   const [isModalVisible, setModalVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOrder, setSortOrder] = useState("asc");
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [perPage] = useState(10);
 
   useEffect(() => {
     dispatch(getUserAd());
@@ -31,6 +35,12 @@ export default function ManageUser() {
     );
   }, [sortOrder, dispatch]);
 
+  // Pagination logic
+  const indexOfLastUser = currentPage * perPage;
+  const indexOfFirstUser = indexOfLastUser - perPage;
+  const currentUsers = allUsers.slice(indexOfFirstUser, indexOfLastUser);
+  const totalPages = Math.ceil(allUsers.length / perPage);
+
   const toggleModalVisibility = () => {
     setModalVisible(!isModalVisible);
   };
@@ -42,6 +52,19 @@ export default function ManageUser() {
   const handleDeleteUser = (id: number) => {
     dispatch(deleteUser(id));
   };
+
+  const navigateToPage = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const changePage = (direction: "prev" | "next") => {
+    if (direction === "prev" && currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    } else if (direction === "next" && currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
   return (
     <>
       <h1 className="text-2xl font-bold mb-4">Quản Lý người dùng</h1>
@@ -56,7 +79,7 @@ export default function ManageUser() {
           <input
             type="text"
             className="py-2 px-4 bg-white border rounded-lg shadow-sm focus:outline-none"
-            placeholder="Search..."
+            placeholder="Tìm kiếm..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -76,45 +99,45 @@ export default function ManageUser() {
           <tr className="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
             <th className="py-3 px-6 text-center">STT</th>
             <th className="py-3 px-6 text-center">Họ và tên</th>
-            <th className="py-3 px-6 text-center">Profile</th>
+            <th className="py-3 px-6 text-center">Hình đại diện</th>
             <th className="py-3 px-6 text-center">Email</th>
             <th className="py-3 px-6 text-center">Trạng thái</th>
             <th className="py-3 px-6 text-center">Chức năng</th>
           </tr>
         </thead>
         <tbody>
-          {getData.map((item: Users, index: number) => (
+          {currentUsers.map((user: Users, index: number) => (
             <tr
               className="hover:bg-gray-100 border-b border-gray-200 py-10"
-              key={item.id}
+              key={user.id}
             >
               <td className="py-3 px-6 text-center whitespace-nowrap">
-                {index + 1}
+                {indexOfFirstUser + index + 1}
               </td>
-              <td className="py-3 px-6 text-center">{item.name}</td>
+              <td className="py-3 px-6 text-center">{user.name}</td>
               <td className="py-3 px-6 text-center">
                 <img
-                  src={item.profilePicture}
-                  alt={item.name}
+                  src={user.profilePicture}
+                  alt={user.name}
                   className="rounded-full w-10 h-10 object-cover mx-auto"
                 />
               </td>
-              <td className="py-3 px-6 text-center">{item.email}</td>
+              <td className="py-3 px-6 text-center">{user.email}</td>
               <td className="py-3 px-6 text-center">
                 <button
-                  onClick={() => handleToggleLock(item.id)}
+                  onClick={() => handleToggleLock(user.id)}
                   className={`${
-                    item.status
+                    user.status
                       ? "text-red-500 hover:text-red-600"
                       : "text-green-500 hover:text-green-600"
                   }`}
                 >
-                  {item.status ? "Khóa" : "Mở khóa"}
+                  {user.status ? "Khóa" : "Mở khóa"}
                 </button>
               </td>
               <td className="py-3 px-6 text-center">
                 <button
-                  onClick={() => handleDeleteUser(item.id)}
+                  onClick={() => handleDeleteUser(user.id)}
                   className="text-red-600 hover:text-red-700 ml-2"
                 >
                   Xóa
@@ -124,6 +147,46 @@ export default function ManageUser() {
           ))}
         </tbody>
       </table>
+      {/* Phân trang */}
+      <div className="flex justify-center mt-4">
+        <nav className="inline-flex">
+          <button
+            onClick={() => changePage("prev")}
+            disabled={currentPage === 1}
+            className={`px-3 py-1 rounded-l-lg ${
+              currentPage === 1
+                ? "bg-gray-300 text-gray-600"
+                : "bg-white text-blue-500 hover:bg-blue-100"
+            } border border-gray-300`}
+          >
+            ‹
+          </button>
+          {[...Array(totalPages).keys()].map((page) => (
+            <button
+              key={page + 1}
+              onClick={() => navigateToPage(page + 1)}
+              className={`px-3 py-1 ${
+                currentPage === page + 1
+                  ? "bg-blue-500 text-white"
+                  : "bg-white text-blue-500 hover:bg-blue-100"
+              } border-t border-b border-gray-300`}
+            >
+              {page + 1}
+            </button>
+          ))}
+          <button
+            onClick={() => changePage("next")}
+            disabled={currentPage === totalPages}
+            className={`px-3 py-1 rounded-r-lg ${
+              currentPage === totalPages
+                ? "bg-gray-300 text-gray-600"
+                : "bg-white text-blue-500 hover:bg-blue-100"
+            } border border-gray-300`}
+          >
+            ›
+          </button>
+        </nav>
+      </div>
     </>
   );
 }

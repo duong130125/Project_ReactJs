@@ -27,9 +27,19 @@ export default function ManageExams() {
   const [editingExam, setEditingExam] = useState<null | Exams>(null);
   const [modalIsOpen, setModalIsOpen] = useState(false);
 
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [perPage] = useState(10);
+
   useEffect(() => {
     dispatch(fetchExams(id));
-  }, [dispatch]);
+  }, [dispatch, id]);
+
+  // Pagination logic
+  const indexOfLastExam = currentPage * perPage;
+  const indexOfFirstExam = indexOfLastExam - perPage;
+  const currentExams = exams.slice(indexOfFirstExam, indexOfLastExam);
+  const totalPages = Math.ceil(exams.length / perPage);
 
   const openModal = () => setModalIsOpen(true);
 
@@ -69,6 +79,19 @@ export default function ManageExams() {
   const handleNext = (id: number) => {
     navigate(`/admin/coursesAd/subjectAd/examAd/questionAd/${id}`);
   };
+
+  const navigateToPage = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const changePage = (direction: "prev" | "next") => {
+    if (direction === "prev" && currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    } else if (direction === "next" && currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Quản Lý Đề Thi</h1>
@@ -90,11 +113,13 @@ export default function ManageExams() {
           </tr>
         </thead>
         <tbody>
-          {exams.map((exam: Exams, index: number) => (
+          {currentExams.map((exam: Exams, index: number) => (
             <tr key={exam.id}>
-              <td className="py-2 px-4 border-b text-center">{index + 1}</td>
+              <td className="py-2 px-4 border-b text-center">
+                {indexOfFirstExam + index + 1}
+              </td>
               <td
-                className="py-2 px-4 border-b text-center"
+                className="py-2 px-4 border-b text-center cursor-pointer"
                 onClick={() => handleNext(exam.id)}
               >
                 {exam.title}
@@ -136,6 +161,47 @@ export default function ManageExams() {
           ))}
         </tbody>
       </table>
+
+      {/* Pagination */}
+      <div className="flex justify-center mt-4">
+        <nav className="inline-flex">
+          <button
+            onClick={() => changePage("prev")}
+            disabled={currentPage === 1}
+            className={`px-3 py-1 rounded-l-lg ${
+              currentPage === 1
+                ? "bg-gray-300 text-gray-600"
+                : "bg-white text-blue-500 hover:bg-blue-100"
+            } border border-gray-300`}
+          >
+            ‹
+          </button>
+          {[...Array(totalPages).keys()].map((page) => (
+            <button
+              key={page + 1}
+              onClick={() => navigateToPage(page + 1)}
+              className={`px-3 py-1 ${
+                currentPage === page + 1
+                  ? "bg-blue-500 text-white"
+                  : "bg-white text-blue-500 hover:bg-blue-100"
+              } border-t border-b border-gray-300`}
+            >
+              {page + 1}
+            </button>
+          ))}
+          <button
+            onClick={() => changePage("next")}
+            disabled={currentPage === totalPages}
+            className={`px-3 py-1 rounded-r-lg ${
+              currentPage === totalPages
+                ? "bg-gray-300 text-gray-600"
+                : "bg-white text-blue-500 hover:bg-blue-100"
+            } border border-gray-300`}
+          >
+            ›
+          </button>
+        </nav>
+      </div>
 
       <ExamModal
         isOpen={modalIsOpen}

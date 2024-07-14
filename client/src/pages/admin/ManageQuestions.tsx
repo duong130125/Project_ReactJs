@@ -27,9 +27,24 @@ export default function ManageQuestions() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const questionsPerPage = 10;
+
   useEffect(() => {
-    dispatch(fetchQuestions(id) as any);
+    dispatch(fetchQuestions(id));
   }, [dispatch, id]);
+
+  // Pagination logic
+  const indexOfLastQuestion = currentPage * questionsPerPage;
+  const indexOfFirstQuestion = indexOfLastQuestion - questionsPerPage;
+  const currentQuestions = questions.slice(
+    indexOfFirstQuestion,
+    indexOfLastQuestion
+  );
+  console.log(indexOfFirstQuestion);
+
+  const totalPages = Math.ceil(questions.length / questionsPerPage);
 
   const handleInputChange = (name: string, value: string) => {
     setQuestionData((prevData) => ({ ...prevData, [name]: value }));
@@ -48,19 +63,19 @@ export default function ManageQuestions() {
   };
 
   const handleAddQuestion = () => {
-    dispatch(addQuestion(questionData) as any);
+    dispatch(addQuestion(questionData));
     resetQuestionData();
     setIsModalOpen(false);
   };
 
   const handleEditQuestion = () => {
-    dispatch(editQuestion(questionData) as any);
+    dispatch(editQuestion(questionData));
     resetQuestionData();
     setIsModalOpen(false);
   };
 
   const handleDeleteQuestion = (questionId: number) => {
-    dispatch(deleteQuestion(questionId) as any);
+    dispatch(deleteQuestion(questionId));
   };
 
   const openEditModal = (question: Questions) => {
@@ -82,7 +97,18 @@ export default function ManageQuestions() {
     });
     setIsEditMode(false);
   };
-  console.log(questionData);
+
+  const navigateToPage = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const changePage = (direction: "prev" | "next") => {
+    if (direction === "prev" && currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    } else if (direction === "next" && currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
 
   return (
     <div className="container mx-auto p-4">
@@ -107,9 +133,11 @@ export default function ManageQuestions() {
           </tr>
         </thead>
         <tbody>
-          {questions.map((question, index) => (
+          {currentQuestions.map((question, index) => (
             <tr key={question.id}>
-              <td className="py-2 px-4 border-b text-center">{index + 1}</td>
+              <td className="py-2 px-4 border-b text-center">
+                {indexOfFirstQuestion + index + 1}
+              </td>
               <td className="py-2 px-4 border-b text-center">
                 {question.question}
               </td>
@@ -137,6 +165,47 @@ export default function ManageQuestions() {
           ))}
         </tbody>
       </table>
+
+      {/* Pagination */}
+      <div className="flex justify-center mt-4">
+        <nav className="inline-flex">
+          <button
+            onClick={() => changePage("prev")}
+            disabled={currentPage === 1}
+            className={`px-3 py-1 rounded-l-lg ${
+              currentPage === 1
+                ? "bg-gray-300 text-gray-600"
+                : "bg-white text-blue-500 hover:bg-blue-100"
+            } border border-gray-300`}
+          >
+            ‹
+          </button>
+          {[...Array(totalPages).keys()].map((page) => (
+            <button
+              key={page + 1}
+              onClick={() => navigateToPage(page + 1)}
+              className={`px-3 py-1 ${
+                currentPage === page + 1
+                  ? "bg-blue-500 text-white"
+                  : "bg-white text-blue-500 hover:bg-blue-100"
+              } border-t border-b border-gray-300`}
+            >
+              {page + 1}
+            </button>
+          ))}
+          <button
+            onClick={() => changePage("next")}
+            disabled={currentPage === totalPages}
+            className={`px-3 py-1 rounded-r-lg ${
+              currentPage === totalPages
+                ? "bg-gray-300 text-gray-600"
+                : "bg-white text-blue-500 hover:bg-blue-100"
+            } border border-gray-300`}
+          >
+            ›
+          </button>
+        </nav>
+      </div>
 
       <QuestionModal
         isOpen={isModalOpen}

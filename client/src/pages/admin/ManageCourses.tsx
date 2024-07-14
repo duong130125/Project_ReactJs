@@ -24,9 +24,19 @@ export default function ManageCourses() {
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const navigate = useNavigate();
 
+  // Trạng thái phân trang
+  const [currentPage, setCurrentPage] = useState(1);
+  const [perPage] = useState(10);
+
   useEffect(() => {
     dispatch(fetchCourses());
   }, [dispatch]);
+
+  // Logic phân trang
+  const indexOfLastCourse = currentPage * perPage;
+  const indexOfFirstCourse = indexOfLastCourse - perPage;
+  const currentCourses = courses.slice(indexOfFirstCourse, indexOfLastCourse);
+  const totalPages = Math.ceil(courses.length / perPage);
 
   const openModal = () => setModalIsOpen(true);
 
@@ -65,6 +75,18 @@ export default function ManageCourses() {
     navigate(`/admin/coursesAd/subjectAd/${id}`);
   };
 
+  const navigateToPage = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const changePage = (direction: "prev" | "next") => {
+    if (direction === "prev" && currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    } else if (direction === "next" && currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Quản Lý Khóa Thi</h1>
@@ -85,9 +107,11 @@ export default function ManageCourses() {
           </tr>
         </thead>
         <tbody>
-          {courses.map((course: Courses, index: number) => (
+          {currentCourses.map((course: Courses, index: number) => (
             <tr key={course.id}>
-              <td className="py-2 px-4 border-b text-center">{index + 1}</td>
+              <td className="py-2 px-4 border-b text-center">
+                {indexOfFirstCourse + index + 1}
+              </td>
               <td
                 className="py-2 px-4 border-b text-center"
                 onClick={() => handleNext(course.id)}
@@ -128,6 +152,47 @@ export default function ManageCourses() {
           ))}
         </tbody>
       </table>
+
+      {/* Pagination */}
+      <div className="flex justify-center mt-4">
+        <nav className="inline-flex">
+          <button
+            onClick={() => changePage("prev")}
+            disabled={currentPage === 1}
+            className={`px-3 py-1 rounded-l-lg ${
+              currentPage === 1
+                ? "bg-gray-300 text-gray-600"
+                : "bg-white text-blue-500 hover:bg-blue-100"
+            } border border-gray-300`}
+          >
+            ‹
+          </button>
+          {[...Array(totalPages).keys()].map((page) => (
+            <button
+              key={page + 1}
+              onClick={() => navigateToPage(page + 1)}
+              className={`px-3 py-1 ${
+                currentPage === page + 1
+                  ? "bg-blue-500 text-white"
+                  : "bg-white text-blue-500 hover:bg-blue-100"
+              } border-t border-b border-gray-300`}
+            >
+              {page + 1}
+            </button>
+          ))}
+          <button
+            onClick={() => changePage("next")}
+            disabled={currentPage === totalPages}
+            className={`px-3 py-1 rounded-r-lg ${
+              currentPage === totalPages
+                ? "bg-gray-300 text-gray-600"
+                : "bg-white text-blue-500 hover:bg-blue-100"
+            } border border-gray-300`}
+          >
+            ›
+          </button>
+        </nav>
+      </div>
 
       <CourseFormModal
         isOpen={modalIsOpen}

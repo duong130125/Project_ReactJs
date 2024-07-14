@@ -5,6 +5,9 @@ import subjectsSlice from "./reducers/admin/getSubject";
 import examsSlice from "./reducers/admin/getExam";
 import questionsSlice from "./reducers/admin/getQuestions";
 import courseUsers from "./reducers/users/courses";
+import subjectUsers from "./reducers/users/subject";
+import examUsers from "./reducers/users/exam";
+import questionUsers from "./reducers/users/question";
 
 export const store = configureStore({
   reducer: {
@@ -14,5 +17,8 @@ export const store = configureStore({
     exam: examsSlice,
     question: questionsSlice,
     userCourse: courseUsers,
+    userSubject: subjectUsers,
+    userExam: examUsers,
+    userQuestion: questionUsers,
   },
 });

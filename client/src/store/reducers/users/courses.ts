@@ -1,15 +1,23 @@
-// src/features/course/courseSlice.ts
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import baseUrl from "../../../api/api";
 import { Courses } from "../../../interfaces/Users";
+import baseUrl from "../../../api/api";
 
 const courseUser: Courses[] = [];
 
-// Fetch all courses
+// Lấy tất cả các khóa học
 export const getCoursesUser: any = createAsyncThunk(
   "course/getUser",
   async () => {
     const response = await baseUrl.get("courses");
+    return response.data;
+  }
+);
+
+// Tìm kiếm khóa học
+export const searchCourses: any = createAsyncThunk(
+  "course/searchCourses",
+  async (query: string) => {
+    const response = await baseUrl.get(`courses?title_like=${query}`);
     return response.data;
   }
 );
@@ -22,6 +30,9 @@ const courseUsers = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder.addCase(getCoursesUser.fulfilled, (state, action) => {
+      state.userCourse = action.payload;
+    });
+    builder.addCase(searchCourses.fulfilled, (state, action) => {
       state.userCourse = action.payload;
     });
   },
