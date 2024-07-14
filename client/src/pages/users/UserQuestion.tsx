@@ -4,13 +4,14 @@ import { getQuestionUser } from "../../store/reducers/users/question";
 import { useDispatch, useSelector } from "react-redux";
 import { Questions } from "../../interfaces/Users";
 import { getExamUserId } from "../../store/reducers/users/exam";
+import baseUrl from "../../api/api";
 
 export default function UserQuestion() {
   const [time, setTime] = useState(0);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [correctAnswers, setCorrectAnswers] = useState<number[]>([]);
   const [userAnswers, setUserAnswers] = useState<{ [key: number]: string }>({});
-  const [initialTime, setInitialTime] = useState(0);
+  const [initialTime, setInitialTime] = useState<number>(0);
 
   const optionLabels = ["A", "B", "C", "D"];
   const dispatch = useDispatch();
@@ -28,23 +29,79 @@ export default function UserQuestion() {
   }, [dispatch, id]);
 
   useEffect(() => {
-    // Khởi tạo thời gian ban đầu
-    setInitialTime(currentExam.duration * 60);
-    setTime(currentExam.duration * 60);
+    // Khôi phục thời gian từ localStorage khi mount lại
+    let timeUserLocal = localStorage.getItem("timeUser");
+    if (timeUserLocal && !isSubmitted) {
+      setTime(parseInt(timeUserLocal, 10));
+    } else {
+      setInitialTime(currentExam.duration * 60);
+      setTime(currentExam.duration * 60);
+    }
+  }, [currentExam, isSubmitted]);
 
-    // Bắt đầu tính thời gian
-    const timerInterval = setInterval(() => {
-      setTime((prevTime) => {
-        const updatedTime = prevTime > 0 ? prevTime - 1 : 0;
-        localStorage.setItem("timeUser", JSON.stringify(updatedTime)); // Lưu thời gian mới vào localStorage
-        return updatedTime;
-      });
-    }, 1000);
+  useEffect(() => {
+    let timerInterval: any;
 
-    // Xóa interval khi component unmount hoặc khi đã nộp bài
+    if (!isSubmitted) {
+      timerInterval = setInterval(() => {
+        setTime((prevTime) => {
+          const updatedTime = prevTime > 0 ? prevTime - 1 : 0;
+          localStorage.setItem("timeUser", JSON.stringify(updatedTime)); // Lưu thời gian mới vào localStorage
+          return updatedTime;
+        });
+      }, 1000);
+    }
+
     return () => clearInterval(timerInterval);
-  }, [currentExam]);
+  }, [isSubmitted]);
 
+  // Hàm xử lý hiện thời gian
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds < 10 ? "0" : ""}${remainingSeconds}`;
+  };
+
+  const handleSubmit = () => {
+    setIsSubmitted(true);
+    const getTime = localStorage.getItem("timeUser");
+    const totalQuestions = questions.length; //tổng câu hỏi
+    const correct = correctAnswers.length; //câu đúng
+    const incorrect = totalQuestions - correct; // câu sai
+    const score = Math.round((correct / totalQuestions) * 10); // xử lý điểm
+    const timeTaken = initialTime - Number(getTime); // thời gian làm bài
+
+    // lấy thông tin người dùng từ local
+    const userId = JSON.parse(String(localStorage.getItem("user")));
+    const nameExam = currentExam.title;
+
+    const userResult = {
+      userId: userId.id,
+      examId: Number(id),
+      nameExam,
+      score: score,
+    };
+
+    try {
+      // Lưu dữ liệu kết quả vào db.json
+      baseUrl.post("userAnswers", userResult);
+    } catch (error) {
+      console.error("Lỗi lưu kết quả người dùng:", error);
+    }
+
+    // Điều hướng đến trang kết quả
+    navigate("/results", {
+      state: {
+        correct,
+        incorrect,
+        score,
+        time: timeTaken,
+      },
+    });
+    localStorage.removeItem("timeUser");
+  };
+
+  // hàm check kết quả
   const handleOptionChange = (questionId: number, option: string) => {
     setUserAnswers((prevAnswers) => ({
       ...prevAnswers,
@@ -63,34 +120,6 @@ export default function UserQuestion() {
         prevCorrect.filter((id) => id !== questionId)
       );
     }
-
-    // Lưu thời gian mỗi khi thay đổi câu trả lời
-    localStorage.setItem("timeUser", JSON.stringify(time));
-  };
-
-  const formatTime = (seconds: number) => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds < 10 ? "0" : ""}${remainingSeconds}`;
-  };
-
-  const handleSubmit = () => {
-    setIsSubmitted(true);
-    const totalQuestions = questions.length;
-    const correct = correctAnswers.length;
-    const incorrect = totalQuestions - correct;
-    const score = Math.round((correct / totalQuestions) * 10);
-    const timeTaken = initialTime - time; // Tính thời gian đã làm bài
-
-    // Điều hướng đến trang kết quả
-    navigate("/results", {
-      state: {
-        correct,
-        incorrect,
-        score,
-        time: timeTaken,
-      },
-    });
   };
 
   return (
