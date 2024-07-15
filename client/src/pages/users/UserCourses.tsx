@@ -6,6 +6,7 @@ import {
 import { Courses } from "../../interfaces/Users";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Modal from "../../components/user/Modal";
 
 export default function UserCourses() {
   const dispatch = useDispatch();
@@ -14,23 +15,27 @@ export default function UserCourses() {
   const courses: Courses[] = useSelector(
     (state: any) => state.userCourse.userCourse
   );
-
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage] = useState(6);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     dispatch(getCoursesUser());
   }, [dispatch]);
 
-  // Logic phân trang
   const indexOfLastCourse = currentPage * perPage;
   const indexOfFirstCourse = indexOfLastCourse - perPage;
   const currentCourses = courses.slice(indexOfFirstCourse, indexOfLastCourse);
   const totalPages = Math.ceil(courses.length / perPage);
 
-  const handleNext = (id: number) => {
-    navigate(`courseUser/userSubject/${id}`);
+  const handleCourseClick = (id: number) => {
+    const isLoggedIn = localStorage.getItem("user"); // lấy dữ liệu local kiểm tra trạng thái đăng nhập
+    if (!isLoggedIn) {
+      setIsModalOpen(true);
+    } else {
+      navigate(`courseUser/userSubject/${id}`);
+    }
   };
 
   const navigateToPage = (page: number) => {
@@ -49,11 +54,24 @@ export default function UserCourses() {
     const query = event.target.value;
     setSearchQuery(query);
     dispatch(searchCourses(query));
-    setCurrentPage(1); // Đặt lại về trang đầu tiên khi tìm kiếm mới
+    setCurrentPage(1);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleLogin = () => {
+    navigate("/login");
   };
 
   return (
     <div className="w-full lg:w-3/4">
+      <Modal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onLogin={handleLogin}
+      />
       <div className="flex justify-between items-center mb-8">
         <h3 className="text-3xl font-bold text-blue-800">Các khóa học</h3>
         <div className="w-full max-w-md">
@@ -71,7 +89,7 @@ export default function UserCourses() {
           <div
             key={course.id}
             className="bg-white shadow-lg rounded-xl overflow-hidden transition-transform duration-300 hover:scale-105"
-            onClick={() => handleNext(course.id)}
+            onClick={() => handleCourseClick(course.id)}
           >
             <img
               src={course.image}
@@ -87,8 +105,6 @@ export default function UserCourses() {
           </div>
         ))}
       </div>
-
-      {/* Phân trang */}
       <div className="flex justify-center mt-4 space-x-2">
         <button
           onClick={() => changePage("prev")}

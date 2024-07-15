@@ -1,11 +1,9 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { addUser } from "../../store/reducers/admin/getUsers";
-import { Form, Input, Button, notification, Select } from "antd";
+import { Form, Input, Button, notification } from "antd";
 import { UserOutlined, MailOutlined, LockOutlined } from "@ant-design/icons";
 import baseUrl from "../../api/api";
-
-const { Option } = Select;
 
 const NewUserForm = ({
   setModalVisible,
@@ -21,7 +19,7 @@ const NewUserForm = ({
       const response = await baseUrl.get(`users?email=${email}`);
       return response.data.length > 0;
     } catch (error) {
-      console.error("Error checking email:", error);
+      console.error("Lỗi kiểm tra email:", error);
       return false;
     }
   };
@@ -39,7 +37,7 @@ const NewUserForm = ({
         email: values.email,
         profilePicture:
           "https://static.vecteezy.com/system/resources/previews/009/734/564/original/default-avatar-profile-icon-of-social-media-user-vector.jpg",
-        role: values.role,
+        role: 0,
         status: true,
         password: values.password,
       };
@@ -169,22 +167,6 @@ const NewUserForm = ({
               prefix={<LockOutlined className="site-form-item-icon" />}
               placeholder="Xác nhận mật khẩu"
             />
-          </Form.Item>
-
-          <Form.Item
-            name="role"
-            label="Vai trò"
-            rules={[
-              {
-                required: true,
-                message: "Vui lòng chọn vai trò!",
-              },
-            ]}
-          >
-            <Select placeholder="Chọn vai trò">
-              <Option value={0}>Người dùng</Option>
-              <Option value={1}>Quản trị viên</Option>
-            </Select>
           </Form.Item>
 
           <Form.Item>

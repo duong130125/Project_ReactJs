@@ -1,15 +1,17 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Form, Input, Button, Checkbox, notification } from "antd";
+import { Form, Input, Button, Checkbox, notification, Modal } from "antd";
 import { UserOutlined, LockOutlined } from "@ant-design/icons";
 import baseUrl from "../api/api";
 import { Users } from "../interfaces/Users";
+import bcrypt from "bcryptjs-react";
 
 export default function Login() {
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const [loading, setLoading] = useState<boolean>(false);
   const [users, setUsers] = useState<Users[]>([]);
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -24,39 +26,63 @@ export default function Login() {
     fetchUsers();
   }, []);
 
-  const onFinish = (values: any) => {
+  const onFinish = async (values: any) => {
     setLoading(true);
     const user = users.find((u) => u.email === values.email);
 
-    if (user && user.password === values.password) {
-      const userInfo = {
-        id: user.id,
-        email: user.email,
-        name: user.name, // Assuming the user object has a name property
-        profilePicture: user.profilePicture, // Assuming the user object has an avatar property
-        role: user.role,
-      };
+    if (user) {
+      try {
+        const passwordMatch = await bcrypt.compare(
+          values.password,
+          user.password
+        );
+        if (passwordMatch) {
+          if (user.status === false) {
+            setIsModalVisible(true);
+          } else {
+            const userInfo = {
+              id: user.id,
+              email: user.email,
+              name: user.name,
+              profilePicture: user.profilePicture,
+              role: user.role,
+              status: user.status,
+            };
 
-      if (values.remember) {
-        localStorage.setItem("user", JSON.stringify(userInfo));
-      } else {
-        sessionStorage.setItem("user", JSON.stringify(userInfo));
-      }
+            if (values.remember) {
+              localStorage.setItem("user", JSON.stringify(userInfo));
+            } else {
+              sessionStorage.setItem("user", JSON.stringify(userInfo));
+            }
 
-      if (user.role === 1) {
-        notification.success({
-          message: "Đăng nhập thành công",
-          description:
-            "Chào mừng bạn đến với trang quản lý Admin của chúng tôi.",
+            if (user.role === 1) {
+              notification.success({
+                message: "Đăng nhập thành công",
+                description:
+                  "Chào mừng bạn đến với trang quản lý Admin của chúng tôi.",
+              });
+              navigate("/admin");
+            } else {
+              notification.success({
+                message: "Đăng nhập thành công",
+                description:
+                  "Chào mừng bạn đến với trang web của chúng tôi. Cùng luyện thi nâng cao kiến thức thôi nào!",
+              });
+              navigate("/");
+            }
+          }
+        } else {
+          notification.error({
+            message: "Đăng nhập thất bại",
+            description: "Email hoặc mật khẩu không chính xác.",
+          });
+        }
+      } catch (error) {
+        console.error("Lỗi khi so sánh mật khẩu:", error);
+        notification.error({
+          message: "Đăng nhập thất bại",
+          description: "Có lỗi xảy ra khi đăng nhập. Vui lòng thử lại sau.",
         });
-        navigate("/admin");
-      } else {
-        notification.success({
-          message: "Đăng nhập thành công",
-          description:
-            "Chào mừng bạn đến với trang web của chúng tôi. Cùng luyện thi nâng cao kiến thức thôi nào!",
-        });
-        navigate("/");
       }
     } else {
       notification.error({
@@ -104,8 +130,9 @@ export default function Login() {
               label="Mật khẩu"
               rules={[
                 { required: true, message: "Vui lòng nhập mật khẩu!" },
-                { min: 8, message: "Mật khẩu phải có ít nhất 8 ký tự!" },
+                { min: 8, message: "Mật khẩu không được quá ngắn!" },
               ]}
+              hasFeedback
             >
               <Input.Password
                 prefix={<LockOutlined className="site-form-item-icon" />}
@@ -145,6 +172,17 @@ export default function Login() {
           </p>
         </div>
       </div>
+      <Modal
+        title="Tài khoản bị khóa"
+        visible={isModalVisible}
+        onOk={() => setIsModalVisible(false)}
+        onCancel={() => setIsModalVisible(false)}
+      >
+        <p>
+          Tài khoản của bạn đã bị khóa. Vui lòng liên hệ admin để biết thêm chi
+          tiết.
+        </p>
+      </Modal>
     </div>
   );
 }

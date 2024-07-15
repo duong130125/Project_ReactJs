@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import bcrypt from "bcryptjs-react";
 import { Form, Input, Button, notification } from "antd";
-import { UserOutlined, MailOutlined, LockOutlined } from "@ant-design/icons";
+import { UserOutlined, LockOutlined, MailOutlined } from "@ant-design/icons";
 import baseUrl from "../api/api";
 
 export default function Register() {
@@ -9,51 +10,44 @@ export default function Register() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState<boolean>(false);
 
-  const checkEmailExists = async (email: string) => {
-    try {
-      const response = await baseUrl.get(`users?email=${email}`);
-      return response.data.length > 0;
-    } catch (error) {
-      console.error("Error checking email:", error);
-      return false;
-    }
-  };
-
   const onFinish = async (values: any) => {
     setLoading(true);
     try {
-      // Kiểm tra email đã tồn tại chưa
-      const emailExists = await checkEmailExists(values.email);
-      if (emailExists) {
-        throw new Error("Email đã được sử dụng");
+      const checkUser = await baseUrl.get(`users?email=${values.email}`);
+      if (checkUser.data.length > 0) {
+        notification.error({
+          message: "Đăng ký thất bại",
+          description: "Email đã được sử dụng. Vui lòng chọn email khác.",
+        });
+        setLoading(false);
+        return;
       }
 
-      const response = await baseUrl.post("users", {
-        name: values.fullName,
+      const hashedPassword = await bcrypt.hash(values.password, 10);
+
+      const userData = {
+        name: values.name,
         email: values.email,
-        password: values.password,
-        profilePicture:
-          "https://static.vecteezy.com/system/resources/previews/009/734/564/original/default-avatar-profile-icon-of-social-media-user-vector.jpg",
+        password: hashedPassword,
         role: 0,
         status: true,
+        profilePicture:
+          "https://static.vecteezy.com/system/resources/previews/009/734/564/original/default-avatar-profile-icon-of-social-media-user-vector.jpg",
+      };
+
+      await baseUrl.post("users", userData);
+
+      notification.success({
+        message: "Đăng ký thành công",
+        description: "Tài khoản của bạn đã được tạo. Vui lòng đăng nhập.",
       });
 
-      if (response.data) {
-        notification.success({
-          message: "Đăng ký thành công",
-          description: "Tài khoản của bạn đã được tạo. Vui lòng đăng nhập.",
-        });
-        navigate("/login");
-      } else {
-        throw new Error(response.data.message || "Đăng ký thất bại");
-      }
-    } catch (error: any) {
+      navigate("/login");
+    } catch (error) {
+      console.error("Có lỗi xảy ra khi đăng ký:", error);
       notification.error({
         message: "Đăng ký thất bại",
-        description:
-          error.response?.data?.message ||
-          error.message ||
-          "Có lỗi xảy ra. Vui lòng thử lại.",
+        description: "Có lỗi xảy ra. Vui lòng thử lại sau.",
       });
     } finally {
       setLoading(false);
@@ -76,68 +70,37 @@ export default function Register() {
             form={form}
             name="register"
             onFinish={onFinish}
-            scrollToFirstError
             layout="vertical"
           >
             <Form.Item
-              name="fullName"
+              name="name"
               label="Họ và tên"
-              rules={[
-                {
-                  required: true,
-                  message: "Vui lòng nhập họ và tên!",
-                },
-              ]}
+              rules={[{ required: true, message: "Vui lòng nhập họ và tên!" }]}
             >
               <Input
                 prefix={<UserOutlined className="site-form-item-icon" />}
-                placeholder="Nhập họ và tên"
+                placeholder="Họ và tên"
               />
             </Form.Item>
-
             <Form.Item
               name="email"
               label="Địa chỉ email"
               rules={[
-                {
-                  type: "email",
-                  message: "Email không đúng định dạng!",
-                },
-                {
-                  required: true,
-                  message: "Vui lòng nhập email!",
-                },
-                {
-                  validator: async (_, value) => {
-                    if (value) {
-                      const exists = await checkEmailExists(value);
-                      if (exists) {
-                        return Promise.reject("Email đã được sử dụng");
-                      }
-                    }
-                    return Promise.resolve();
-                  },
-                },
+                { required: true, message: "Vui lòng nhập địa chỉ email!" },
+                { type: "email", message: "Email không đúng định dạng!" },
               ]}
             >
               <Input
                 prefix={<MailOutlined className="site-form-item-icon" />}
-                placeholder="Nhập địa chỉ email"
+                placeholder="Địa chỉ email"
               />
             </Form.Item>
-
             <Form.Item
               name="password"
               label="Mật khẩu"
               rules={[
-                {
-                  required: true,
-                  message: "Vui lòng nhập mật khẩu!",
-                },
-                {
-                  min: 8,
-                  message: "Mật khẩu phải có ít nhất 8 ký tự!",
-                },
+                { required: true, message: "Vui lòng nhập mật khẩu!" },
+                { min: 8, message: "Mật khẩu không được quá ngắn!" },
               ]}
               hasFeedback
             >
@@ -146,23 +109,21 @@ export default function Register() {
                 placeholder="Nhập mật khẩu"
               />
             </Form.Item>
-
             <Form.Item
-              name="confirmPassword"
+              name="confirm"
               label="Xác nhận mật khẩu"
               dependencies={["password"]}
               hasFeedback
               rules={[
-                {
-                  required: true,
-                  message: "Vui lòng xác nhận mật khẩu!",
-                },
+                { required: true, message: "Vui lòng xác nhận mật khẩu!" },
                 ({ getFieldValue }) => ({
                   validator(_, value) {
                     if (!value || getFieldValue("password") === value) {
                       return Promise.resolve();
                     }
-                    return Promise.reject(new Error("Mật khẩu không khớp!"));
+                    return Promise.reject(
+                      new Error("Mật khẩu xác nhận không khớp!")
+                    );
                   },
                 }),
               ]}
@@ -172,7 +133,6 @@ export default function Register() {
                 placeholder="Xác nhận mật khẩu"
               />
             </Form.Item>
-
             <Form.Item>
               <Button
                 type="primary"
@@ -184,11 +144,6 @@ export default function Register() {
               </Button>
             </Form.Item>
           </Form>
-
-          <div className="text-center mt-4">
-            <span className="text-sm text-gray-600">hoặc</span>
-          </div>
-
           <p className="mt-6 text-center text-gray-600">
             Đã có tài khoản?{" "}
             <Link to="/login" className="text-purple-500 hover:underline">

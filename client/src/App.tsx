@@ -19,16 +19,7 @@ export default function App() {
         <Route path="*" element={<NotFound />}></Route>
         <Route path="/userQuestion/:id" element={<UserQuestion />}></Route>
         <Route path="/results" element={<ResultUser />} />
-        <Route
-          path="/userHome"
-          element={
-            <UserPage
-              name="Nguyễn Văn A"
-              email="nguyenvana@example.com"
-              avatarUrl="https://example.com/path-to-avatar.jpg"
-            />
-          }
-        ></Route>
+        <Route path="/userHome" element={<UserPage />}></Route>
       </Routes>
     </>
   );

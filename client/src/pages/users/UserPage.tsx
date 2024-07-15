@@ -1,7 +1,8 @@
 import Footer from "../../layout/Footer";
 import Header from "../../layout/Header";
 
-export default function UserPage({ name, email, avatarUrl }) {
+export default function UserPage() {
+  const getUser = JSON.parse(String(localStorage.getItem("user")));
   return (
     <>
       <Header></Header>
@@ -10,14 +11,14 @@ export default function UserPage({ name, email, avatarUrl }) {
           <div className="flex flex-col md:flex-row">
             <div className="md:w-1/3 mb-4 md:mb-0">
               <img
-                src={avatarUrl}
+                src={getUser.profilePicture}
                 alt="Ảnh đại diện"
                 className="w-32 h-32 rounded-full object-cover mx-auto border-4 border-white shadow-lg"
               />
             </div>
             <div className="md:w-2/3 md:pl-6">
-              <h2 className="text-3xl font-bold mb-2">{name}</h2>
-              <p className="mb-4">{email}</p>
+              <h2 className="text-3xl font-bold mb-2">{getUser.name}</h2>
+              <p className="mb-4">{getUser.email}</p>
             </div>
           </div>
           <div className="mt-6 pt-6 border-t border-white border-opacity-50">

@@ -57,6 +57,23 @@ export const deleteUser: any = createAsyncThunk(
   }
 );
 
+export const updateUserRole: any = createAsyncThunk(
+  "users/updateRole",
+  async (
+    { userId, newRole }: { userId: number; newRole: number },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await baseUrl.patch(`users/${userId}`, {
+        role: newRole,
+      });
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
 const userAdmin = createSlice({
   name: "userad",
   initialState: {
@@ -88,6 +105,14 @@ const userAdmin = createSlice({
       state.user = state.user.filter(
         (user: Users) => user.id !== action.payload
       );
+    });
+    builder.addCase(updateUserRole.fulfilled, (state, action) => {
+      const index = state.user.findIndex(
+        (user) => user.id === action.payload.id
+      );
+      if (index !== -1) {
+        state.user[index] = action.payload;
+      }
     });
   },
 });

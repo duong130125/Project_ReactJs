@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { FaUsers, FaCog, FaBell, FaSignOutAlt, FaBook } from "react-icons/fa";
-import { Link, Route, Routes } from "react-router-dom";
+import { Link, Route, Routes, useNavigate } from "react-router-dom";
 import ManageUser from "./ManageUser";
 import ManageCourses from "./ManageCourses";
 import ManageSubjects from "./ManageSubjects";
@@ -7,6 +8,13 @@ import ManageExams from "./ManageExams";
 import ManageQuestions from "./ManageQuestions";
 
 export default function HomeAdmin() {
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    navigate("/");
+  };
+
   return (
     <>
       <header className="bg-gradient-to-r from-blue-500 to-teal-400 shadow-lg">
@@ -30,7 +38,10 @@ export default function HomeAdmin() {
               alt="User Avatar"
               className="rounded-full w-10 h-10"
             />
-            <button className="bg-white text-blue-500 px-4 py-2 rounded-full hover:bg-gray-100 flex items-center">
+            <button
+              onClick={() => setShowLogoutModal(true)}
+              className="bg-white text-blue-500 px-4 py-2 rounded-full hover:bg-gray-100 flex items-center"
+            >
               <FaSignOutAlt className="mr-2" /> Logout
             </button>
           </div>
@@ -73,6 +84,32 @@ export default function HomeAdmin() {
           </Routes>
         </main>
       </div>
+      {showLogoutModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center transition-opacity duration-300">
+          <div className="bg-white w-96 p-8 rounded-2xl shadow-2xl transform transition-all duration-300 scale-95 hover:scale-100">
+            <h2 className="text-2xl font-bold mb-6 text-gray-800">
+              Xác nhận đăng xuất
+            </h2>
+            <p className="mb-8 text-gray-600">
+              Bạn có chắc chắn muốn đăng xuất khỏi hệ thống?
+            </p>
+            <div className="flex justify-end space-x-4">
+              <button
+                onClick={() => setShowLogoutModal(false)}
+                className="px-6 py-2 rounded-full text-gray-700 bg-gray-200 hover:bg-gray-300 transition-colors duration-200"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={handleLogout}
+                className="px-6 py-2 rounded-full text-white bg-blue-500 hover:bg-blue-600 transition-colors duration-200 shadow-md hover:shadow-lg"
+              >
+                Đăng xuất
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

@@ -6,9 +6,11 @@ import {
   deleteUser,
   searchUsers,
   sortUsers,
+  updateUserRole,
 } from "../../store/reducers/admin/getUsers";
 import NewUserForm from "../../components/admin/FormNewUser";
 import { Users } from "../../interfaces/Users";
+import { Select } from "antd";
 
 export default function ManageUser() {
   const dispatch = useDispatch();
@@ -16,10 +18,11 @@ export default function ManageUser() {
   const [isModalVisible, setModalVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOrder, setSortOrder] = useState("asc");
+  const { Option } = Select;
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
-  const [perPage] = useState(10);
+  const [perPage] = useState(5);
 
   useEffect(() => {
     dispatch(getUserAd());
@@ -65,6 +68,11 @@ export default function ManageUser() {
     }
   };
 
+  // phân quyền
+  const handleRoleChange = (userId: number, newRole: number) => {
+    dispatch(updateUserRole({ userId, newRole }));
+  };
+
   return (
     <>
       <h1 className="text-2xl font-bold mb-4">Quản Lý người dùng</h1>
@@ -101,6 +109,7 @@ export default function ManageUser() {
             <th className="py-3 px-6 text-center">Họ và tên</th>
             <th className="py-3 px-6 text-center">Hình đại diện</th>
             <th className="py-3 px-6 text-center">Email</th>
+            <th className="py-3 px-6 text-center">Vai trò</th>
             <th className="py-3 px-6 text-center">Trạng thái</th>
             <th className="py-3 px-6 text-center">Chức năng</th>
           </tr>
@@ -123,6 +132,16 @@ export default function ManageUser() {
                 />
               </td>
               <td className="py-3 px-6 text-center">{user.email}</td>
+              <td className="py-3 px-6 text-center">
+                <Select
+                  value={user.role}
+                  onChange={(value) => handleRoleChange(user.id, value)}
+                  style={{ width: 140 }}
+                >
+                  <Option value={0}>Người dùng</Option>
+                  <Option value={1}>Quản trị viên</Option>
+                </Select>
+              </td>
               <td className="py-3 px-6 text-center">
                 <button
                   onClick={() => handleToggleLock(user.id)}
