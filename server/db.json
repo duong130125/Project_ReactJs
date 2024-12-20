@@ -1,40 +1,22 @@
 {
   "users": [
     {
-      "name": "ADMIN",
-      "email": "admin@gmail.com",
-      "password": "$2a$10$YdepaM5vXyy9V2CdAAJ5kuRFNRLmWpfn0YEpiBamZq26cD4rJpcZq",
-      "role": 0,
+      "name": "Nguyễn Đình Dương",
+      "email": "hung@gmai.com",
+      "password": "$2a$10$HItMlGsCIUq8voNHPpZE/O5564qgeWORU4rdvF7m1X/2YNUkiazL6",
+      "role": 1,
       "status": true,
       "profilePicture": "https://static.vecteezy.com/system/resources/previews/009/734/564/original/default-avatar-profile-icon-of-social-media-user-vector.jpg",
-      "id": 1
+      "id": 5
     },
     {
       "name": "Nguyễn Đình Dương",
       "email": "duong@gmail.com",
-      "password": "$2a$10$jhcDagvOB9bGg0ERDgL6He8KolEMo5U.6Xq/UyB7nqo.yxc1qhdVG",
+      "password": "$2a$10$UqgZRw0nBao2D9rMppu0UOmDR2GvIAhaUbbGxDPnkz0QQnl7JBzjC",
       "role": 0,
       "status": true,
       "profilePicture": "https://static.vecteezy.com/system/resources/previews/009/734/564/original/default-avatar-profile-icon-of-social-media-user-vector.jpg",
-      "id": 2
-    },
-    {
-      "name": "phạm trung hiếu",
-      "email": "hieu455@gmail.com",
-      "profilePicture": "https://static.vecteezy.com/system/resources/previews/009/734/564/original/default-avatar-profile-icon-of-social-media-user-vector.jpg",
-      "role": 0,
-      "status": true,
-      "password": "123456789",
-      "id": 3
-    },
-    {
-      "name": "Nguyễn Đình Dương",
-      "email": "duong123@gmail.com",
-      "password": "$2a$10$w.glYfzOyzzX5aI7xO15Ju8CHV9FrXfFZRxqLoHM6hUibLKE7hACS",
-      "role": 0,
-      "status": true,
-      "profilePicture": "https://static.vecteezy.com/system/resources/previews/009/734/564/original/default-avatar-profile-icon-of-social-media-user-vector.jpg",
-      "id": 4
+      "id": 6
     }
   ],
   "courses": [
@@ -142,77 +124,45 @@
       "id": 1,
       "question": "1 +1 =?",
       "examId": 1,
-      "options": [
-        "2",
-        "3",
-        "8",
-        "7"
-      ],
+      "options": ["2", "3", "8", "7"],
       "answer": "2"
     },
     {
       "id": 2,
       "question": "Vạn lý trường thành của nước nào?",
       "examId": 1,
-      "options": [
-        "Trung Quốc",
-        "Việt Nam",
-        "Hàn Quốc",
-        "Nhật Bản"
-      ],
+      "options": ["Trung Quốc", "Việt Nam", "Hàn Quốc", "Nhật Bản"],
       "answer": "Trung Quốc"
     },
     {
       "id": 3,
       "question": "Căn bậc 2 của 4 là bao nhiêu?",
       "examId": 1,
-      "options": [
-        "8",
-        "3",
-        "8",
-        "2"
-      ],
+      "options": ["8", "3", "8", "2"],
       "answer": "2"
     },
     {
       "id": 4,
       "question": "1 +1 =?",
       "examId": 3,
-      "options": [
-        "2",
-        "3",
-        "8",
-        "7"
-      ],
+      "options": ["2", "3", "8", "7"],
       "answer": "2"
     },
     {
       "id": 5,
       "question": "2 * 6 =?",
       "examId": 3,
-      "options": [
-        "5",
-        "12",
-        "8",
-        "30"
-      ],
+      "options": ["5", "12", "8", "30"],
       "answer": "12"
     }
   ],
   "userAnswers": [
     {
-      "userId": 1,
+      "userId": 6,
       "examId": 1,
       "nameExam": "Đề thi số 1",
       "score": 10,
       "id": 1
-    },
-    {
-      "userId": 2,
-      "examId": 1,
-      "nameExam": "Đề thi số 1",
-      "score": 10,
-      "id": 2
     }
   ]
 }

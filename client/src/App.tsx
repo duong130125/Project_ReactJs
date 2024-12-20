@@ -7,6 +7,7 @@ import NotFound from "./components/NotFound";
 import UserQuestion from "./pages/users/UserQuestion";
 import UserPage from "./pages/users/UserPage";
 import ResultUser from "./pages/users/ResultUser";
+import UserDetailExam from "./pages/users/UserDetailExam";
 
 export default function App() {
   return (
@@ -20,6 +21,7 @@ export default function App() {
         <Route path="/userQuestion/:id" element={<UserQuestion />}></Route>
         <Route path="/results" element={<ResultUser />} />
         <Route path="/userHome" element={<UserPage />}></Route>
+        <Route path="/examDetail" element={<UserDetailExam />}></Route>
       </Routes>
     </>
   );
