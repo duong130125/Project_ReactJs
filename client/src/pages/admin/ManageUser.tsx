@@ -11,6 +11,7 @@ import {
 import NewUserForm from "../../components/admin/FormNewUser";
 import { Users } from "../../interfaces/Users";
 import { Select } from "antd";
+import { HiOutlineSearch, HiOutlinePlus, HiOutlineLockClosed, HiOutlineLockOpen, HiOutlineTrash } from "react-icons/hi";
 
 export default function ManageUser() {
   const dispatch = useDispatch();
@@ -56,156 +57,154 @@ export default function ManageUser() {
     dispatch(deleteUser(id));
   };
 
-  const navigateToPage = (page: number) => {
-    setCurrentPage(page);
-  };
-
-  const changePage = (direction: "prev" | "next") => {
-    if (direction === "prev" && currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    } else if (direction === "next" && currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
-
-  // phân quyền
   const handleRoleChange = (userId: number, newRole: number) => {
     dispatch(updateUserRole({ userId, newRole }));
   };
 
   return (
-    <>
-      <h1 className="text-2xl font-bold mb-4">Quản Lý người dùng</h1>
-      <div className="flex justify-between items-center mb-4">
-        <button
-          onClick={toggleModalVisibility}
-          className="py-2 px-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-        >
-          Thêm mới
-        </button>
-        <div className="flex items-center space-x-2">
-          <input
-            type="text"
-            className="py-2 px-4 bg-white border rounded-lg shadow-sm focus:outline-none"
-            placeholder="Tìm kiếm..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          <select
-            className="py-2 px-4 bg-white border rounded-lg shadow-sm focus:outline-none"
-            value={sortOrder}
-            onChange={(e) => setSortOrder(e.target.value)}
+    <div className="bg-white rounded-3xl shadow-card border border-slate-100 p-6 animate-fade-in-up">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+        <div>
+          <h1 className="text-2xl font-extrabold text-slate-800 tracking-tight">Quản Lý Người Dùng</h1>
+          <p className="text-sm text-slate-500 mt-1">Danh sách tất cả học viên và quản trị viên</p>
+        </div>
+        
+        <div className="flex flex-col sm:flex-row w-full md:w-auto items-stretch sm:items-center gap-3">
+          <div className="relative flex-1 sm:w-64">
+            <HiOutlineSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none transition-all focus:border-primary-400 focus:bg-white focus:ring-2 focus:ring-primary-100"
+              placeholder="Tìm kiếm user..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          
+          <div className="w-full sm:w-36">
+            <Select
+              className="w-full h-9 rounded-xl"
+              value={sortOrder}
+              onChange={(value) => setSortOrder(value)}
+            >
+              <Option value="asc">Tăng dần (A-Z)</Option>
+              <Option value="desc">Giảm dần (Z-A)</Option>
+            </Select>
+          </div>
+
+          <button
+            onClick={toggleModalVisibility}
+            className="flex items-center justify-center gap-2 px-5 py-2 whitespace-nowrap bg-gradient-to-r from-primary-500 to-primary-600 text-white font-semibold rounded-xl hover:from-primary-600 hover:to-primary-700 shadow-md shadow-primary-200 transition-all"
           >
-            <option value="asc">Tăng dần</option>
-            <option value="desc">Giảm dần</option>
-          </select>
+            <HiOutlinePlus className="w-5 h-5" /> Thêm mới
+          </button>
         </div>
       </div>
+
       {isModalVisible && <NewUserForm setModalVisible={setModalVisible} />}
-      <table className="min-w-full bg-white rounded-lg shadow-lg">
-        <thead>
-          <tr className="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
-            <th className="py-3 px-6 text-center">STT</th>
-            <th className="py-3 px-6 text-center">Họ và tên</th>
-            <th className="py-3 px-6 text-center">Hình đại diện</th>
-            <th className="py-3 px-6 text-center">Email</th>
-            <th className="py-3 px-6 text-center">Vai trò</th>
-            <th className="py-3 px-6 text-center">Trạng thái</th>
-            <th className="py-3 px-6 text-center">Chức năng</th>
-          </tr>
-        </thead>
-        <tbody>
-          {currentUsers.map((user: Users, index: number) => (
-            <tr
-              className="hover:bg-gray-100 border-b border-gray-200 py-10"
-              key={user.id}
-            >
-              <td className="py-3 px-6 text-center whitespace-nowrap">
-                {indexOfFirstUser + index + 1}
-              </td>
-              <td className="py-3 px-6 text-center">{user.name}</td>
-              <td className="py-3 px-6 text-center">
-                <img
-                  src={user.profilePicture}
-                  alt={user.name}
-                  className="rounded-full w-10 h-10 object-cover mx-auto"
-                />
-              </td>
-              <td className="py-3 px-6 text-center">{user.email}</td>
-              <td className="py-3 px-6 text-center">
-                <Select
-                  value={user.role}
-                  onChange={(value) => handleRoleChange(user.id, value)}
-                  style={{ width: 140 }}
-                >
-                  <Option value={0}>Người dùng</Option>
-                  <Option value={1}>Quản trị viên</Option>
-                </Select>
-              </td>
-              <td className="py-3 px-6 text-center">
-                <button
-                  onClick={() => handleToggleLock(user.id)}
-                  className={`${
-                    user.status
-                      ? "text-red-500 hover:text-red-600"
-                      : "text-green-500 hover:text-green-600"
-                  }`}
-                >
-                  {user.status ? "Khóa" : "Mở khóa"}
-                </button>
-              </td>
-              <td className="py-3 px-6 text-center">
-                <button
-                  onClick={() => handleDeleteUser(user.id)}
-                  className="text-red-600 hover:text-red-700 ml-2"
-                >
-                  Xóa
-                </button>
-              </td>
+
+      <div className="overflow-x-auto rounded-xl border border-slate-200">
+        <table className="min-w-full bg-white whitespace-nowrap">
+          <thead className="bg-slate-50 border-b border-slate-200">
+            <tr>
+              <th className="py-4 px-6 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">STT</th>
+              <th className="py-4 px-6 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Người dùng</th>
+              <th className="py-4 px-6 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Vai trò</th>
+              <th className="py-4 px-6 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Trạng thái</th>
+              <th className="py-4 px-6 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">Hành động</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-      {/* Phân trang */}
-      <div className="flex justify-center mt-4">
-        <nav className="inline-flex">
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {currentUsers.map((user: Users, index: number) => (
+              <tr className="hover:bg-slate-50 transition-colors group" key={user.id}>
+                <td className="py-4 px-6 text-sm text-slate-500 font-medium">#{indexOfFirstUser + index + 1}</td>
+                <td className="py-4 px-6">
+                  <div className="flex items-center gap-4">
+                    <img
+                      src={user.profilePicture}
+                      alt={user.name}
+                      className="w-10 h-10 rounded-xl object-cover border border-slate-200"
+                    />
+                    <div>
+                      <p className="text-sm font-bold text-slate-800 group-hover:text-primary-600 transition-colors">{user.name}</p>
+                      <p className="text-xs text-slate-500">{user.email}</p>
+                    </div>
+                  </div>
+                </td>
+                <td className="py-4 px-6">
+                  <Select
+                    value={user.role}
+                    onChange={(value) => handleRoleChange(user.id, value)}
+                    style={{ width: 130 }}
+                  >
+                    <Option value={0}>Học viên</Option>
+                    <Option value={1}>Admin</Option>
+                  </Select>
+                </td>
+                <td className="py-4 px-6 text-center">
+                  <button
+                    onClick={() => handleToggleLock(user.id)}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-lg border transition-all ${
+                      user.status
+                        ? "bg-green-50 text-green-600 border-green-200 hover:bg-green-100 hover:text-green-700" 
+                        : "bg-red-50 text-red-600 border-red-200 hover:bg-red-100 hover:text-red-700"
+                    }`}
+                  >
+                    {user.status ? <HiOutlineLockOpen className="w-4 h-4"/> : <HiOutlineLockClosed className="w-4 h-4" />}
+                    {user.status ? "Hoạt động" : "Bị khóa"}
+                  </button>
+                </td>
+                <td className="py-4 px-6 text-right">
+                  <button
+                    onClick={() => handleDeleteUser(user.id)}
+                    className="p-2 text-red-500 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors"
+                    title="Xóa"
+                  >
+                    <HiOutlineTrash className="w-5 h-5" />
+                  </button>
+                </td>
+              </tr>
+            ))}
+            {currentUsers.length === 0 && (
+              <tr>
+                <td colSpan={5} className="py-8 text-center text-slate-500">Không tìm thấy người dùng nào.</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {totalPages > 1 && (
+        <div className="flex justify-end mt-6 gap-2">
           <button
-            onClick={() => changePage("prev")}
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
             disabled={currentPage === 1}
-            className={`px-3 py-1 rounded-l-lg ${
-              currentPage === 1
-                ? "bg-gray-300 text-gray-600"
-                : "bg-white text-blue-500 hover:bg-blue-100"
-            } border border-gray-300`}
+            className="px-3 py-2 text-sm rounded-lg border border-slate-200 text-slate-600 hover:bg-primary-50 hover:text-primary-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors font-semibold"
           >
-            ‹
+            Trang trước
           </button>
-          {[...Array(totalPages).keys()].map((page) => (
+          {[...Array(totalPages)].map((_, i) => (
             <button
-              key={page + 1}
-              onClick={() => navigateToPage(page + 1)}
-              className={`px-3 py-1 ${
-                currentPage === page + 1
-                  ? "bg-blue-500 text-white"
-                  : "bg-white text-blue-500 hover:bg-blue-100"
-              } border-t border-b border-gray-300`}
+              key={i}
+              onClick={() => setCurrentPage(i + 1)}
+              className={`w-9 h-9 flex items-center justify-center text-sm font-semibold rounded-lg transition-all ${
+                currentPage === i + 1
+                  ? "bg-gradient-to-br from-primary-500 to-primary-600 text-white shadow-md shadow-primary-200"
+                  : "border border-slate-200 text-slate-600 hover:bg-primary-50 hover:text-primary-600"
+              }`}
             >
-              {page + 1}
+              {i + 1}
             </button>
           ))}
           <button
-            onClick={() => changePage("next")}
+            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
             disabled={currentPage === totalPages}
-            className={`px-3 py-1 rounded-r-lg ${
-              currentPage === totalPages
-                ? "bg-gray-300 text-gray-600"
-                : "bg-white text-blue-500 hover:bg-blue-100"
-            } border border-gray-300`}
+            className="px-3 py-2 text-sm rounded-lg border border-slate-200 text-slate-600 hover:bg-primary-50 hover:text-primary-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors font-semibold"
           >
-            ›
+            Trang sau
           </button>
-        </nav>
-      </div>
-    </>
+        </div>
+      )}
+    </div>
   );
 }

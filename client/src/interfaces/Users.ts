@@ -40,10 +40,11 @@ export interface Questions {
   answer: string;
 }
 
-export interface userAnswers {
+export interface UserAnswers {
   id: number;
   userId: number;
-  exampId: number;
+  examId: number;
+  nameExam: string;
   score: number;
 }
 

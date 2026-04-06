@@ -1,105 +1,181 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Dropdown, Menu } from "antd";
+import { useAppSelector, useAppDispatch } from "../store/hooks";
+import { logout } from "../store/reducers/authSlice";
+import {
+  HiOutlineMenu,
+  HiOutlineX,
+  HiOutlineAcademicCap,
+  HiOutlineChevronDown,
+  HiOutlineUser,
+  HiOutlineLogout,
+} from "react-icons/hi";
 
 export default function Header() {
-  const [user, setUser] = useState<any>(null);
+  const { user } = useAppSelector((state) => state.auth);
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const storedUser =
-      localStorage.getItem("user") || sessionStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-  }, []);
+  const [open, setOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const handleLogout = () => {
-    localStorage.removeItem("user");
-    sessionStorage.removeItem("user");
-    setUser(null);
+    dispatch(logout());
+    setDropdownOpen(false);
     navigate("/");
   };
 
-  const menu = (
-    <Menu>
-      <Menu.Item key="profile">
-        <Link to="/userHome">Hồ sơ</Link>
-      </Menu.Item>
-      <Menu.Item key="logout" onClick={handleLogout}>
-        Đăng xuất
-      </Menu.Item>
-    </Menu>
-  );
+  const navLinks = [
+    { to: "/", label: "Trang chủ" },
+    { to: "/courses", label: "Khóa học" },
+    { to: "/about", label: "Về chúng tôi" },
+    { to: "/contact", label: "Liên hệ" },
+  ];
 
   return (
-    <header className="bg-gradient-to-r from-orange-500 to-red-600 shadow-lg">
-      <div className="container mx-auto flex justify-between items-center p-6">
-        <div className="flex items-center">
-          <img
-            src="https://firebasestorage.googleapis.com/v0/b/project-df4f0.appspot.com/o/%E1%BA%A2nh_ch%E1%BB%A5p_m%C3%A0n_h%C3%ACnh_2024-07-10_152831-removebg-preview.png?alt=media&token=5b582e5e-2635-4bee-9427-0eab5511dc79"
-            alt="Logo"
-            className="h-14 w-20 filter drop-shadow-md"
-          />
-          <span className="ml-3 text-2xl font-extrabold text-sky-300 tracking-wide">
+    <header className="bg-white/80 backdrop-blur-lg border-b border-slate-100 sticky top-0 z-50">
+      <div className="container mx-auto flex justify-between items-center py-3 px-4 md:px-6">
+        {/* Logo */}
+        <Link to="/" className="flex items-center gap-2 group">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center shadow-lg shadow-primary-200 group-hover:shadow-primary-300 transition-shadow">
+            <HiOutlineAcademicCap className="h-6 w-6 text-white" />
+          </div>
+          <span className="text-xl font-extrabold text-gradient-primary tracking-tight">
             VinaStudy
           </span>
-        </div>
+        </Link>
 
-        <nav className="hidden md:flex space-x-7">
-          <Link
-            to="/"
-            className="text-white hover:text-orange-200 text-xl transition duration-300"
-          >
-            Trang chủ
-          </Link>
-          <Link
-            to="/courses"
-            className="text-white hover:text-orange-200 text-xl transition duration-300"
-          >
-            Khóa học
-          </Link>
-          <Link
-            to="/about"
-            className="text-white hover:text-orange-200 text-xl transition duration-300"
-          >
-            Về chúng tôi
-          </Link>
-          <Link
-            to="/contact"
-            className="text-white hover:text-orange-200 text-xl transition duration-300"
-          >
-            Liên hệ
-          </Link>
+        {/* Desktop Nav */}
+        <nav className="hidden md:flex items-center gap-1">
+          {navLinks.map((link) => (
+            <Link
+              key={link.to}
+              to={link.to}
+              className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors duration-200"
+            >
+              {link.label}
+            </Link>
+          ))}
         </nav>
-        <div className="flex items-center space-x-4">
+
+        {/* Right */}
+        <div className="flex items-center gap-3">
+          {/* Mobile toggle */}
+          <button
+            className="md:hidden p-2 rounded-lg hover:bg-slate-100 transition"
+            onClick={() => setOpen(!open)}
+          >
+            {open ? (
+              <HiOutlineX className="h-6 w-6 text-slate-700" />
+            ) : (
+              <HiOutlineMenu className="h-6 w-6 text-slate-700" />
+            )}
+          </button>
+
           {user ? (
-            <Dropdown overlay={menu} trigger={["click"]}>
-              <div className="flex items-center cursor-pointer">
-                <span className="text-white text-xl">{user.name}</span>
+            <div className="relative">
+              <button
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+                className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-full border border-slate-200 hover:border-primary-300 hover:bg-primary-50 transition-colors"
+              >
                 <img
                   src={user.profilePicture}
-                  alt="User Avatar"
-                  className="h-10 w-10 rounded-full ml-2"
+                  alt="Avatar"
+                  className="h-8 w-8 rounded-full object-cover"
                 />
-              </div>
-            </Dropdown>
+                <span className="text-sm font-medium text-slate-700 hidden sm:inline max-w-[120px] truncate">
+                  {user.name}
+                </span>
+                <HiOutlineChevronDown className="h-4 w-4 text-slate-400" />
+              </button>
+
+              {dropdownOpen && (
+                <>
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setDropdownOpen(false)}
+                  />
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-elevated border border-slate-100 py-2 z-50 animate-fade-in">
+                    <div className="px-4 py-2 border-b border-slate-100">
+                      <p className="text-sm font-semibold text-slate-800 truncate">
+                        {user.name}
+                      </p>
+                      <p className="text-xs text-slate-500 truncate">
+                        {user.email}
+                      </p>
+                    </div>
+                    <Link
+                      to="/userHome"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-primary-50 hover:text-primary-600 transition-colors"
+                    >
+                      <HiOutlineUser className="h-4 w-4" /> Hồ sơ cá nhân
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                    >
+                      <HiOutlineLogout className="h-4 w-4" /> Đăng xuất
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
           ) : (
-            <>
+            <div className="hidden md:flex items-center gap-2">
               <Link to="/login">
-                <button className="bg-white text-orange-600 px-6 py-2 rounded-full font-semibold hover:bg-orange-100 transition duration-300 ease-in-out transform hover:scale-105 shadow-md">
+                <button className="px-5 py-2 text-sm font-medium text-slate-700 hover:text-primary-600 hover:bg-primary-50 rounded-xl transition-colors">
                   Đăng nhập
                 </button>
               </Link>
               <Link to="/register">
-                <button className="bg-orange-600 text-white px-6 py-2 rounded-full font-semibold hover:bg-orange-700 transition duration-300 ease-in-out transform hover:scale-105 shadow-md">
+                <button className="px-5 py-2 text-sm font-medium text-white bg-gradient-to-r from-primary-500 to-primary-600 rounded-xl hover:from-primary-600 hover:to-primary-700 shadow-md shadow-primary-200 transition-all duration-200">
                   Đăng ký
                 </button>
               </Link>
-            </>
+            </div>
           )}
         </div>
       </div>
+
+      {/* Mobile Nav */}
+      {open && (
+        <div className="md:hidden border-t border-slate-100 bg-white animate-fade-in">
+          <div className="container mx-auto px-4 py-3 space-y-1">
+            {navLinks.map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                onClick={() => setOpen(false)}
+                className="block px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-colors"
+              >
+                {link.label}
+              </Link>
+            ))}
+            {!user && (
+              <div className="pt-3 flex gap-2">
+                <Link to="/login" onClick={() => setOpen(false)} className="flex-1">
+                  <button className="w-full py-2.5 text-sm font-medium border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors">
+                    Đăng nhập
+                  </button>
+                </Link>
+                <Link to="/register" onClick={() => setOpen(false)} className="flex-1">
+                  <button className="w-full py-2.5 text-sm font-medium text-white bg-gradient-to-r from-primary-500 to-primary-600 rounded-xl transition-all">
+                    Đăng ký
+                  </button>
+                </Link>
+              </div>
+            )}
+            {user && (
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              >
+                <HiOutlineLogout className="h-4 w-4" /> Đăng xuất
+              </button>
+            )}
+          </div>
+        </div>
+      )}
     </header>
   );
 }

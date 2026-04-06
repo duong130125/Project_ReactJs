@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { ExamSubjects } from "../../interfaces/Users";
 import {
   addSubject,
@@ -11,19 +11,19 @@ import SubjectModal from "../../components/admin/FormSubject";
 import { useNavigate, useParams } from "react-router-dom";
 
 export default function ManageSubjects() {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   let { id } = useParams();
   const navigate = useNavigate();
 
-  const subjects: ExamSubjects[] = useSelector(
-    (state: any) => state.subject.subject
+  const subjects: ExamSubjects[] = useAppSelector(
+    (state) => state.subject.subject as ExamSubjects[]
   );
 
   const [newSubject, setNewSubject] = useState<any>({
     title: "",
     description: "",
     image:
-      "https://firebasestorage.googleapis.com/v0/b/project-df4f0.appspot.com/o/20.jpg?alt=media&token=a41bd001-b347-4d45-876e-b408f734a36a",
+      "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=2069&auto=format&fit=crop",
     courseId: Number(id),
   });
   const [editingSubject, setEditingSubject] = useState<null | ExamSubjects>(
@@ -57,7 +57,7 @@ export default function ManageSubjects() {
       title: "",
       description: "",
       image:
-        "https://firebasestorage.googleapis.com/v0/b/project-df4f0.appspot.com/o/20.jpg?alt=media&token=a41bd001-b347-4d45-876e-b408f734a36a",
+        "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=2069&auto=format&fit=crop",
       courseId: Number(id),
     });
   };
